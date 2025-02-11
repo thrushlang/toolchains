@@ -1,2 +1,3 @@
-# toolchains
-Collection of standard toolchains for the Thrush programming language.
+# Toolchains
+
+This repository houses all the standard toolchains containing backend compilers for the Thrush programming language.
