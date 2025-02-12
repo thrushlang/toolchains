@@ -25,6 +25,9 @@ def optimize_toolchain(path: str):
             if os.access(os.path.join(path, name), os.X_OK) or os.path.join(path, name).endswith(".so"):
                 os.system(f"sstrip {os.path.join(path, name)}")
 
+            if os.path.join(path, name).endswith(".a"):
+                os.system(f"strip --strip-all {os.path.join(path, name)}")
+
         if os.path.isdir(os.path.join(path, name)): optimize_toolchain(os.path.join(path, name))
 
 def reorganize_precompiled_binaries(based: List[str], target: List[str]):
