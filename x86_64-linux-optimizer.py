@@ -2,7 +2,7 @@
 
 # #######################################################################################
 #
-#  Optimizer and Reorganizer for the Thrush Toolchain for Clang & LLVM x86_64 binaries.
+#  Optimizer and Reorganizer for the Thrush Toolchain for Clang & LLVM x64 binaries.
 #
 # #######################################################################################
 
