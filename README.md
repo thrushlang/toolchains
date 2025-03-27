@@ -10,7 +10,7 @@ This repository contains toolchains with:
 ## Manual installation 
 
 > [!NOTE]  
-> The Thorium package manager is responsible for automatically installing the toolchains on each operating system, using the `throium install` command. You can do this manually, but it's **not recommended**.
+> The Thorium package manager is responsible for automatically installing the toolchains on each operating system, using the `thorium install` command. You can do this manually, but it's **not recommended**.
 
 ## Linux
 
