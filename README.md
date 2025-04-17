@@ -26,7 +26,7 @@ cd ~ && mkdir -p thrushlang/backends/llvm && cd thrushlang/backends/llvm
 
 #### Unzip the toolchain:
 
-~ Change the 'X' characters to the version you are going to use.
+- Change the 'X' characters to the version you are going to use.
 
 ```console
 tar -xf thrushlang-toolchain-llvm-linux-x64-vX.X.X.tar.xz
@@ -44,7 +44,7 @@ find . -type f -name "*.xz" -execdir xz -d {} \;
 
 #### Create 'thrushlang' folder at %APPDATA% directory:
 
-- Change the `<username>` word with the user name of your Windows profile.
+- Change the '\<username\>' word with the user name of your Windows profile.
 
 ```console
 mkdir "C:/Users/<username>/AppData/Roaming/thrushlang/backends/llvm"
@@ -57,7 +57,7 @@ mkdir "C:/Users/<username>/AppData/Roaming/thrushlang/backends/llvm"
 #### Unzip the toolchain:
 
 - Change the 'X' characters to the version you are going to use.
-- Change the `<username>` word with the user name of your Windows profile.
+- Change the '\<username\>' word with the user name of your Windows profile.
 
 ```console
 tar -xJf thrushlang-toolchain-llvm-windows-x64-vX.X.X.tar.xz -C "C:/Users/<username>/AppData/Roaming/thrushlang/backends/llvm"
