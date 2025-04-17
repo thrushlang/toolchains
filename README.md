@@ -38,9 +38,27 @@ tar -xf thrushlang-toolchain-llvm-linux-x64-vX.X.X.tar.xz
 find . -type f -name "*.xz" -execdir xz -d {} \;
 ```
 
-~ You can now use `thrushc` from the path and enable compilation to binaries correctly.
+~ You can now use `thrushc` and enable compilation to binaries correctly.
 
 ## Windows
 
-~ Not develop yet
+#### Create 'thrushlang' folder at %APPDATA% directory:
+
+```console
+mkdir "C:/Users/<username>/AppData/Roaming/thrushlang/backends/llvm"
+```
+
+#### Download the latest toolchain release:
+
+- **[Windows Toolchain x64](https://github.com/thrushlang/toolchains/releases/download/Toolchains/thrushlang-toolchain-llvm-windows-x64-v1.0.0.tar.xz)**
+
+#### Unzip the toolchain:
+
+~ Change the 'X' characters to the version you are going to use.
+
+```console
+tar -xJf thrushlang-toolchain-llvm-windows-x64-vX.X.X.tar.xz -C "C:/Users/<username>/AppData/Roaming/thrushlang/backends/llvm"
+```
+
+~ You can now use `thrushc` and enable compilation to binaries correctly.
 
