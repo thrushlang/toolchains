@@ -57,6 +57,7 @@ mkdir "C:/Users/<username>/AppData/Roaming/thrushlang/backends/llvm"
 #### Unzip the toolchain:
 
 ~ Change the 'X' characters to the version you are going to use.
+
 ~ Change the '<username>' word with the user name of your Windows profile.
 
 ```console
