@@ -52,15 +52,14 @@ mkdir "C:/Users/<username>/AppData/Roaming/thrushlang/backends/llvm"
 
 #### Download the latest toolchain release:
 
-- **[Windows Toolchain x64](https://github.com/thrushlang/toolchains/releases/download/Toolchains/thrushlang-toolchain-llvm-windows-x64-v1.0.0.tar.xz)**
+- **[Windows Toolchain x64](https://github.com/thrushlang/toolchains/releases/download/Toolchains/thrushlang-toolchain-llvm-windows-x64-v1.0.1.exe)**
 
-#### Unzip the toolchain:
+#### Run the toolchain installer
 
 - Change the 'X' characters to the version you are going to use.
-- Change the '\<username\>' word with the user name of your Windows profile.
 
 ```console
-tar -xJf thrushlang-toolchain-llvm-windows-x64-vX.X.X.tar.xz -C "C:/Users/<username>/AppData/Roaming/thrushlang/backends/llvm"
+.\thrushlang-toolchain-llvm-windows-x64-vX.X.X.exe
 ```
 
 ~ You can now use `thrushc` and enable compilation to binaries correctly.
