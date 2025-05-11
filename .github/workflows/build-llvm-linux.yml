@@ -46,9 +46,9 @@ jobs:
           ./llc --help
         working-directory: llvm-project/llvm/build
 
-      - name: Uploading opt and llc
+      - name: Uploading LLVM binaries
         uses: actions/upload-artifact@v4
         with:
-          name: llvm-binaries
+          name: llvm-linux-binaries
           path: llvm-project/llvm/dist/bin
           if-no-files-found: error
