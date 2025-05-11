@@ -17,7 +17,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name || 'llvm-custom-' + github.run_id }}  # Usa el tag o un ID único
+          tag_name: ${{ 'linux-llvm-' github.run_id }} 
           name: "LLVM LLC Tool (Minimal Build)"
           body: |
             Binario **llc** compilado en modo mínimo.
