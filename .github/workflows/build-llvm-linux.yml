@@ -43,15 +43,12 @@ jobs:
             -DLLVM_ENABLE_RUNTIMES=OFF \      
             -DLLVM_OPTIMIZED_TABLEGEN=ON \
             ../CMakeLists.txt
-        working-directory: llvm-project/llvm/build
 
       - name: Building LLVM
         run: ninja -j$(nproc)
-        working-directory: llvm-project/llvm/build
 
       - name: Installing LLVM
         run: sudo ninja install
-        working-directory: llvm-project/llvm/build
 
       - name: Verifying installation
         run: |
