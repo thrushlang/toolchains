@@ -1,0 +1,54 @@
+name: Build LLVM Manually
+
+# Define cuándo se ejecutará el workflow
+on:
+  workflow_dispatch: 
+
+jobs:
+  build-llvm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout LLVM repository
+        run: |
+          git clone --depth 1 https://github.com/llvm/llvm-project.git
+          cd llvm-project
+          git checkout llvmorg-17.0.6 
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake ninja-build python3 libz-dev
+          
+      - name: Create install directory
+        run: |
+          mkdir llvm-project/dist
+
+      - name: Create build directory
+        run: |
+          mkdir llvm-project/build
+          cd llvm-project/build
+          
+      - name: Configure CMake
+        run: |
+          cmake -G Ninja \
+            -DLLVM_ENABLE_PROJECTS="llvm" \
+            -DCMAKE_BUILD_TYPE=MinSizeRel \
+            -DLLVM_TARGETS_TO_BUILD="X86" \
+            -DCMAKE_INSTALL_PREFIX="../dist" \
+            ../llvm
+        working-directory: llvm-project/build
+
+      - name: Build LLVM
+        run: ninja -j$(nproc)
+        working-directory: llvm-project/build
+
+      - name: Install LLVM
+        run: sudo ninja install
+        working-directory: llvm-project/build
+
+      - name: Verify installation
+        run: |
+          cd ..
+          cd dist
+          llc --help
