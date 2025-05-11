@@ -1,8 +1,7 @@
-name: Build LLVM Manually
+name: Build LLVM
 
-# Define cuándo se ejecutará el workflow
 on:
-  workflow_dispatch: 
+  workflow_dispatch:
 
 jobs:
   build-llvm:
