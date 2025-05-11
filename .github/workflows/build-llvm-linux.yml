@@ -33,7 +33,10 @@ jobs:
         working-directory: llvm-project/llvm/build
 
       - name: Building LLVM
-        run: ninja -j$(nproc)
+        run: |
+          ninja -j$(nproc) llc
+          ninja -j$(nproc) opt
+          
         working-directory: llvm-project/llvm/build
 
       - name: Uploading LLVM binaries
