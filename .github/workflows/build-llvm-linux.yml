@@ -22,7 +22,7 @@ jobs:
           
       - name: Preparing for build
         run: |
-          mv llvm-project-17.0.6 llvm-project
+          mv llvm-project-17.0.6.src llvm-project
           mkdir llvm-project/llvm/dist
           mkdir llvm-project/llvm/build
           cd llvm-project/llvm/build
