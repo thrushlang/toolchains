@@ -10,32 +10,7 @@ jobs:
     steps:
       - name: Downloading LLVM project
         run: |
-          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/llvm-project-17.0.6.src.tar.xz
-
-      - name: Unpacking LLVM project 
-        run: |
-          tar -xf llvm-project-17.0.6.src.tar.xz
-
-      - name: Installing dependencies
-        run: |
-          sudo apt-get install -y build-essential cmake ninja-build python3 libz-dev clang
-          
-      - name: Preparing for build
-        run: |
-          mv llvm-project-17.0.6.src llvm-project
-          mkdir llvm-project/llvm/dist
-          mkdir llvm-project/llvm/build
-          cd llvm-project/llvm/build
-          
-      - name: Configuring CMake
-        run: |
-          cmake ../CMakeLists.txt -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DLLVM_ENABLE_PROJECTS="llvm" -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_INSTALL_PREFIX="../dist" -DLLVM_BUILD_TESTS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_DOCS=OFF -DLLVM_INSTALL_TOOLCHAIN_ONLY=ON -DLLVM_ENABLE_RUNTIMES="libc"
-        working-directory: llvm-project/llvm/build
-
-      - name: Building LLVM
-        run: ninja -j$(nproc) opt
-        working-directory: llvm-project/llvm/build
-
+          touch test.txt    
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
@@ -47,6 +22,6 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            llvm-project/llvm/dist/bin/opt
+            text.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
