@@ -33,7 +33,15 @@ jobs:
             -DLLVM_ENABLE_PROJECTS="llvm" \
             -DCMAKE_BUILD_TYPE=MinSizeRel \
             -DLLVM_TARGETS_TO_BUILD="X86" \
-            -DCMAKE_INSTALL_PREFIX="../dist" \
+            -DCMAKE_INSTALL_PREFIX="../dist" \ 
+            -DLLVM_BUILD_TOOLS=ON \ 
+            -DLLVM_BUILD_TESTS=OFF \         
+            -DLLVM_BUILD_EXAMPLES=OFF \           
+            -DLLVM_INCLUDE_TESTS=OFF \            
+            -DLLVM_INCLUDE_EXAMPLES=OFF \        
+            -DLLVM_INCLUDE_DOCS=OFF \ 
+            -DLLVM_ENABLE_RUNTIMES=OFF \      
+            -DLLVM_OPTIMIZED_TABLEGEN=ON \
             ../CMakeLists.txt
         working-directory: llvm-project/llvm/build
 
@@ -47,5 +55,11 @@ jobs:
 
       - name: Verifying installation
         run: |
-          cd dist
+          cd dist/bin
           ./llc --help
+
+      - name: Uploading opt and llc
+        uses: actions/upload-artifact@v3
+        with:
+          name: llvm-binaries
+          path: llvm-project/llvm/dist/bin/opt llvm-project/llvm/dist/bin/llc
