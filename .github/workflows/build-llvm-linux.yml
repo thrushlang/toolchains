@@ -34,7 +34,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=MinSizeRel \
             -DLLVM_TARGETS_TO_BUILD="X86" \
             -DCMAKE_INSTALL_PREFIX="../dist" \
-            ../llvm
+            ../CMakeLists.txt
         working-directory: llvm-project/llvm/build
 
       - name: Building LLVM
@@ -47,6 +47,5 @@ jobs:
 
       - name: Verifying installation
         run: |
-          cd ..
           cd dist
           ./llc --help
