@@ -41,7 +41,7 @@ jobs:
             -DLLVM_INCLUDE_EXAMPLES=OFF \        
             -DLLVM_INCLUDE_DOCS=OFF \ 
             -DLLVM_ENABLE_RUNTIMES=OFF \      
-            -DLLVM_OPTIMIZED_TABLEGEN=ON
+            -DLLVM_OPTIMIZED_TABLEGEN=ON \
 
         working-directory: llvm-project/llvm/build
 
