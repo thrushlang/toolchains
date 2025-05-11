@@ -31,7 +31,6 @@ jobs:
             - Sistema: Ubuntu Linux
             - Compilador: Clang/GCC (auto-detectado)
           files: |
-            build/bin/llc
             LICENSE.txt
           draft: false       # Release público
           prerelease: false  # No es una versión preliminar
