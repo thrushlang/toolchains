@@ -29,7 +29,7 @@ jobs:
           
       - name: Configuring CMake
         run: |
-          cmake -G Ninja \
+          cmake ../CMakeLists.txt -G Ninja \
             -DLLVM_ENABLE_PROJECTS="llvm" \
             -DCMAKE_BUILD_TYPE=MinSizeRel \
             -DLLVM_TARGETS_TO_BUILD="X86" \
@@ -41,8 +41,7 @@ jobs:
             -DLLVM_INCLUDE_EXAMPLES=OFF \        
             -DLLVM_INCLUDE_DOCS=OFF \ 
             -DLLVM_ENABLE_RUNTIMES=OFF \      
-            -DLLVM_OPTIMIZED_TABLEGEN=ON \
-            ../CMakeLists.txt
+            -DLLVM_OPTIMIZED_TABLEGEN=ON
 
       - name: Building LLVM
         run: ninja -j$(nproc)
