@@ -14,10 +14,18 @@ jobs:
         run: echo ${{ github.sha }} > Release.txt
       - name: Test
         run: cat Release.txt
-      - name: Release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
-        if: github.ref_type == 'tag'
         with:
+          tag_name: ${{ github.ref_name || 'llvm-custom-' + github.run_id }}  # Usa el tag o un ID único
+          name: "LLVM LLC Tool (Minimal Build)"
+          body: |
+            Binario **llc** compilado en modo mínimo.
+            - Versión: LLVM 17.0.6
+            - Sistema: Ubuntu Linux
+            - Compilador: Clang/GCC (auto-detectado)
           files: |
-            Release.txt
-            LICENSE
+            build/bin/llc
+            LICENSE.txt
+          draft: false       # Release público
+          prerelease: false  # No es una versión preliminar
