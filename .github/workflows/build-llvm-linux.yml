@@ -43,16 +43,21 @@ jobs:
             -DLLVM_ENABLE_RUNTIMES=OFF \      
             -DLLVM_OPTIMIZED_TABLEGEN=ON
 
+        working-directory: llvm-project/llvm/build
+
       - name: Building LLVM
         run: ninja -j$(nproc)
+        working-directory: llvm-project/llvm/build
 
       - name: Installing LLVM
         run: sudo ninja install
+        working-directory: llvm-project/llvm/build
 
       - name: Verifying installation
         run: |
           cd dist/bin
           ./llc --help
+        working-directory: llvm-project/llvm/build
 
       - name: Uploading opt and llc
         uses: actions/upload-artifact@v4
