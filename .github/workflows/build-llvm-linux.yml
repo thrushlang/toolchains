@@ -1,4 +1,4 @@
-name: Build LLVM
+name: Build LLVM Toolchain
 
 on:
   workflow_dispatch:
@@ -33,15 +33,20 @@ jobs:
         working-directory: llvm-project/llvm/build
 
       - name: Building LLVM
-        run: |
-          ninja -j$(nproc) llc
-          ninja -j$(nproc) opt
-          
+        run: ninja -j$(nproc) opt
         working-directory: llvm-project/llvm/build
 
-      - name: Uploading LLVM binaries
-        uses: actions/upload-artifact@v4
+      - name: Release
+        uses: softprops/action-gh-release@v4
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          name: llvm-linux-binaries
-          path: llvm-project/llvm/build/bin
-          if-no-files-found: error
+          name: Release ${{ github.ref_name }}
+          body: |
+            Binaries for LLVM opt and llc
+            - opt: LLVM optimizer
+          draft: false
+          prerelease: false
+          files: |
+            llvm-project/llvm/dist/bin/opt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
