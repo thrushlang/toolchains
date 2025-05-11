@@ -1,0 +1,52 @@
+name: Build LLVM
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-llvm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Downloading LLVM project
+        run: |
+          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/llvm-project-17.0.6.src.tar.xz
+
+      - name: Unpacking LLVM project 
+        run: |
+          tar -xf llvm-project-17.0.6.src.tar.xz
+
+      - name: Installing dependencies
+        run: |
+          sudo apt-get install -y build-essential cmake ninja-build python3 libz-dev
+          
+      - name: Preparing for build
+        run: |
+          mv llvm-project-17.0.6 llvm-project
+          mkdir llvm-project/llvm/dist
+          mkdir llvm-project/llvm/build
+          cd llvm-project/llvm/build
+          
+      - name: Configuring CMake
+        run: |
+          cmake -G Ninja \
+            -DLLVM_ENABLE_PROJECTS="llvm" \
+            -DCMAKE_BUILD_TYPE=MinSizeRel \
+            -DLLVM_TARGETS_TO_BUILD="X86" \
+            -DCMAKE_INSTALL_PREFIX="../dist" \
+            ../llvm
+        working-directory: llvm-project/llvm/build
+
+      - name: Building LLVM
+        run: ninja -j$(nproc)
+        working-directory: llvm-project/llvm/build
+
+      - name: Installing LLVM
+        run: sudo ninja install
+        working-directory: llvm-project/llvm/build
+
+      - name: Verifying installation
+        run: |
+          cd ..
+          cd dist
+          ./llc --help
