@@ -11,17 +11,9 @@ jobs:
       - name: Downloading LLVM project
         run: |
           touch test.txt    
+          
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          name: Release ${{ github.ref_name }}
-          body: |
-            Binaries for LLVM opt and llc
-            - opt: LLVM optimizer
-          draft: false
-          prerelease: false
-          files: |
-            text.txt
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            files: test.txt
