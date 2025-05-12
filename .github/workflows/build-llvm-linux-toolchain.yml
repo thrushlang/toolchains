@@ -76,7 +76,7 @@ jobs:
           body: |
             ## Linux LLVM Toolchain
            
-            **Production-ready** LLVM binaries compiled with maximum optimizations for Linux environments.
+            **Production-ready** LLVM v17.0.6 binaries compiled with maximum optimizations for Linux environments.
       
             ### Components
       
