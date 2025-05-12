@@ -18,9 +18,14 @@ jobs:
     steps:
       - name: Generating Unique ID
         run: |
-          BUILD_ID=$(echo "$GITHUB_REF" | sed 's|^refs/tags/||')
+          BASE_NAME=$(echo "$GITHUB_REF" | sed 's|^refs/tags/||')
+          BUILD_ID="${BASE_NAME}-$GITHUB_RUN_ID" 
+          
           echo "BUILD_ID=$BUILD_ID" >> $GITHUB_ENV
-          echo "Unique Identification: $BUILD_ID"
+          echo "BUILD_ID=$TAG_NAME" >> $GITHUB_ENV
+
+          echo "Unique ID: $BUILD_ID"
+          echo "Base name: $TAG_NAME"
     
       - name: Downloading LLVM project
         run: |
