@@ -40,42 +40,27 @@ jobs:
           cd build
         working-directory: llvm-project/llvm
           
-      - name: Configuring CMake (LLVM TOOLS)
+      - name: Configuring CMake
         run: |
-          cmake ../CMakeLists.txt -G Ninja -DLLVM_ENABLE_PROJECTS="llvm" -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_BUILD_TESTS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_DOCS=OFF -DLLVM_INSTALL_TOOLCHAIN_ONLY=ON -DLLVM_ENABLE_RUNTIMES="libc"
+          cmake ../CMakeLists.txt -G Ninja -DLLVM_ENABLE_PROJECTS="llvm;lld" -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_BUILD_TESTS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_DOCS=OFF -DLLVM_ENABLE_RUNTIMES="libc"
         working-directory: llvm-project/llvm/build
 
-      - name: Building LLVM (TOOLS)
+      - name: Building LLVM
         run: |
+          ninja -j$(nproc) lld
           ninja -j$(nproc) llc
           ninja -j$(nproc) opt
           ninja -j$(nproc) llvm-dis
         working-directory: llvm-project/llvm/build
 
-      - name: Preparing for build (LLVM LINKERS)
-        run: |
-          mkdir build
-          cd build
-        working-directory: llvm-project/lld
-          
-      - name: Configuring CMake (LLVM LINKERS)
-        run: |
-          cmake ../CMakeLists.txt -G Ninja -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_ENABLE_PROJECTS="lld" -DBUILD_SHARED_LIBS=ON -DLLVM_BUILD_TESTS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_DOCS=OFF -DLLVM_INSTALL_TOOLCHAIN_ONLY=ON -DLLVM_ENABLE_RUNTIMES=""
-        working-directory: llvm-project/lld/build
-
-      - name: Building LLVM (LLVM LINKERS)
-        run: |
-          ninja -j$(nproc)
-        working-directory: llvm-project/lld/build
- 
       - name: Packaging LLVM (LLVM Linker Libraries)
         run: |
-          tar --format=pax -cJf linkers_libs.tar.xz --exclude='*/*.o' --exclude='*/*.cmake' --exclude='*/*.d' lib
-        working-directory: llvm-project/lld/build
+          tar --format=pax -cJf linkers_libraries.tar.xz --exclude='*/*.o' --exclude='*/*.cmake' --exclude='*/*.d' lib
+        working-directory: llvm-project/llvm/build
 
       - name: Optimizing LLVM (LLVM TOOLS & LINKERS)
         run: |
-          strip lld/build/bin/lld lld/build/bin/wasm-ld llvm/build/bin/llc llvm/build/bin/opt llvm/build/bin/llvm-dis
+          strip llvm/build/bin/lld llvm/build/bin/wasm-ld llvm/build/bin/llc llvm/build/bin/opt llvm/build/bin/llvm-dis
         working-directory: llvm-project/
           
       - name: Releasing LLVM Toolchain
@@ -102,7 +87,7 @@ jobs:
           files: |
             llvm-project/lld/build/bin/lld
             llvm-project/lld/build/bin/wasm-ld
-            llvm-project/lld/build/linkers_libs.tar.xz
+            llvm-project/lld/build/linkers_libraries.tar.xz
             llvm-project/llvm/build/bin/llc
             llvm-project/llvm/build/bin/opt
             llvm-project/llvm/build/bin/llvm-dis
