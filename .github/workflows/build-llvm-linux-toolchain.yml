@@ -5,7 +5,7 @@ on:
 
 jobs:
   build-llvm:
-    runs-on: self-hosted
+    runs-on: [self-hosted, linux, X64]
 
     permissions:
       contents: write
