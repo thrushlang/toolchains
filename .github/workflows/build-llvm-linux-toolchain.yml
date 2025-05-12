@@ -30,12 +30,11 @@ jobs:
       - name: Preparing for build (LLVM LINKERS)
         run: |
           mkdir llvm-project/lld/build
-          mkdir llvm-project/lld/dist
           cd llvm-project/lld/build
           
       - name: Configuring CMake (LLVM LINKERS)
         run: |
-          cmake ../CMakeLists.txt -G Ninja -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX="../dist"
+          cmake ../CMakeLists.txt -G Ninja -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_TARGETS_TO_BUILD="X86"
         working-directory: llvm-project/lld/build
 
       - name: Building LLVM (LLVM LINKERS)
@@ -53,7 +52,7 @@ jobs:
           
       - name: Configuring CMake (LLVM TOOLS)
         run: |
-          cmake ../CMakeLists.txt -G Ninja -DLLVM_ENABLE_PROJECTS="llvm" -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_INSTALL_PREFIX="../dist" -DLLVM_BUILD_TESTS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_DOCS=OFF -DLLVM_INSTALL_TOOLCHAIN_ONLY=ON -DLLVM_ENABLE_RUNTIMES="libc"
+          cmake ../CMakeLists.txt -G Ninja -DLLVM_ENABLE_PROJECTS="llvm" -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_BUILD_TESTS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_DOCS=OFF -DLLVM_INSTALL_TOOLCHAIN_ONLY=ON -DLLVM_ENABLE_RUNTIMES="libc"
         working-directory: llvm-project/llvm/build
 
       - name: Building LLVM (TOOLS)
