@@ -35,7 +35,7 @@ jobs:
           
       - name: Configuring CMake (LLVM LINKERS)
         run: |
-          cmake ../CMakeLists.txt -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_INSTALL_PREFIX="../dist" -DLLVM_BUILD_TESTS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_DOCS=OFF
+          cmake ../CMakeLists.txt -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX="../dist"
         working-directory: llvm-project/lld/build
 
       - name: Building LLVM (LLVM LINKERS)
