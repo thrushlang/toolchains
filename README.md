@@ -16,7 +16,7 @@ You should use the package manager of **Thrush Programming Language**, which is 
 thorium toolchain llvm update
 ```
 
-## AUTOMATIC INSTALATION
+## AUTOMATIC INSTALLATION
 
 ```console
 thorium toolchain llvm install
