@@ -61,7 +61,6 @@ jobs:
       - name: Building LLVM (LLVM LINKERS)
         run: |
           ninja -j$(nproc) lld
-          ninja -j$(nproc) wasm-ld
         working-directory: llvm-project/lld/build
 
       - name: Releasing
@@ -87,7 +86,6 @@ jobs:
             
           files: |
             llvm-project/lld/build/bin/lld
-            llvm-project/lld/build/bin/wasm-ld
             llvm-project/llvm/build/bin/llc
             llvm-project/llvm/build/bin/opt
             llvm-project/llvm/build/bin/llvm-dis
