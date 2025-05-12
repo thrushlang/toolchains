@@ -3,7 +3,7 @@ name: Build LLVM-C API (Linux)
 on:
   push:
     tags:
-      - 'LLVM-C-API (Linux)'
+      - 'LLVM-C-API-LINUX-v*.*.*'
 
 jobs:
   build-llvm:
