@@ -31,8 +31,9 @@ jobs:
 
       - name: Preparing for build (LLVM TOOLS)
         run: |
-          mkdir llvm-project/llvm/build
-          cd llvm-project/llvm/build
+          mkdir build
+          cd build
+        working-directory: llvm-project/llvm
           
       - name: Configuring CMake (LLVM TOOLS)
         run: |
