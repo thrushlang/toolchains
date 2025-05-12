@@ -67,6 +67,11 @@ jobs:
         run: |
           ninja -j$(nproc) lld
         working-directory: llvm-project/lld/build
+ 
+      - name: Packaging LLVM (LLVM Linker Libraries)
+        run: |
+          tar --format=pax -cJf linkers_libs.tar.xz --exclude='*/*.o' --exclude='*/*.cmake' --exclude='*/*.d'' lib
+        working-directory: llvm-project/lld/build
 
       - name: Optimizing LLVM (LLVM TOOLS & LINKERS)
         run: |
@@ -97,6 +102,7 @@ jobs:
           files: |
             llvm-project/lld/build/bin/lld
             llvm-project/lld/build/bin/wasm-ld
+            llvm-project/lld/build/linkers_libs.tar.xz
             llvm-project/llvm/build/bin/llc
             llvm-project/llvm/build/bin/opt
             llvm-project/llvm/build/bin/llvm-dis
