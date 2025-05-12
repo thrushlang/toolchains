@@ -1,9 +1,9 @@
-name: Build LLVM (Linux)
+name: Build LLVM Toolchain (Linux)
 
 on:
   push:
     tags:
-      - 'LLVM-Linux-v*.*.*'
+      - 'LLVM-LINUX-v*.*.*'
 
 jobs:
   build-llvm:
@@ -18,9 +18,14 @@ jobs:
     steps:
       - name: Generating Unique Identification
         run: |
-          BUILD_ID=$(echo "$GITHUB_REF" | sed 's|^refs/tags/||')
+          BASE_NAME=$(echo "$GITHUB_REF" | sed 's|^refs/tags/||')
+          BUILD_ID="${BASE_NAME}-$GITHUB_RUN_ID" 
+          
           echo "BUILD_ID=$BUILD_ID" >> $GITHUB_ENV
-          echo "Unique Identification: $BUILD_ID"
+          echo "BUILD_ID=$TAG_NAME" >> $GITHUB_ENV
+
+          echo "Unique ID: $BUILD_ID"
+          echo "Base name: $TAG_NAME"
     
       - name: Downloading LLVM project
         run: |
@@ -70,7 +75,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.BUILD_ID }}
-          name: ${{ env.BUILD_ID }}
+          name: "LLVM (Linux)"
           body: |
             ## LLVM Toolchain (Linux)
            
