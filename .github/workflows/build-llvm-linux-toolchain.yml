@@ -14,6 +14,10 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
   
     steps:
+      - name: Generating Unique Identification
+        run: |
+          echo "BUILD_ID=$GITHUB_RUN_NUMBER.$GITHUB_RUN_ATTEMPT" >> $GITHUB_ENV
+    
       - name: Downloading LLVM project
         run: |
           wget https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/llvm-project-17.0.6.src.tar.xz
@@ -67,12 +71,12 @@ jobs:
         run: |
           strip lld/build/bin/lld lld/build/bin/wasm-ld llvm/build/bin/llc llvm/build/bin/opt llvm/build/bin/llvm-dis
         working-directory: llvm-project/
-
-      - name: Releasing
+          
+      - name: Releasing LLVM Toolchain
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ format('linux-llvm-{0}', github.run_id) }}
-          name: "Linux LLVM Toolchain"
+          tag_name: ${{ format('linux-llvm-{0}', env.BUILD_ID) }}
+          name: ${{ format('Linux LLVM Toolchain v{0}', env.BUILD_ID) }}
           body: |
             ## Linux LLVM Toolchain
            
