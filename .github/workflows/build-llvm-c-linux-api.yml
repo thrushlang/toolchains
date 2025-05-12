@@ -1,9 +1,9 @@
-name: Build LLVM-C Linux API
+name: Build LLVM-C API (Linux)
 
 on:
   push:
     tags:
-      - 'LLVM-C-API-Linux-v*.*.*'
+      - 'LLVM-C-API (Linux)'
 
 jobs:
   build-llvm:
@@ -18,8 +18,9 @@ jobs:
     steps:
       - name: Generating Unique ID
         run: |
-          BUILD_ID=${GITHUB_REF#refs/tags/v}
+          BUILD_ID=$(echo "$GITHUB_REF" | sed 's|^refs/tags/||')
           echo "BUILD_ID=$BUILD_ID" >> $GITHUB_ENV
+          echo "Unique Identification: $BUILD_ID"
     
       - name: Downloading LLVM project
         run: |
