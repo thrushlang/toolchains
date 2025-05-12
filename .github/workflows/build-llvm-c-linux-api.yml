@@ -64,7 +64,7 @@ jobs:
 
       - name: Packaging LLVM-C API (Includes)
         run: |
-          tar --format=pax -cJf includes.tar.xz --exclude='*/*.o' --exclude='*/*.cmake' --exclude='*/*.d' dist/include build/include
+          tar --format=pax -cJf includes.tar.xz --exclude='*/*.o' --exclude='*/*.cmake' --exclude='*/*.d' dist/include
         working-directory: llvm-project/llvm
 
       - name: Releasing Linux LLVM-C API
