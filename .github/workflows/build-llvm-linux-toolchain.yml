@@ -26,27 +26,11 @@ jobs:
       - name: Installing dependencies
         run: |
           sudo apt-get install -y build-essential cmake ninja-build python3 libz-dev
+          sudo apt-get remove -y llvm-16* clang-16*
+          sudo rm -rf /usr/lib/llvm-16
 
-      - name: Preparing for build (LLVM LINKERS)
-        run: |
-          mkdir llvm-project/lld/build
-          cd llvm-project/lld/build
-          
-      - name: Configuring CMake (LLVM LINKERS)
-        run: |
-          cmake ../CMakeLists.txt -G Ninja -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_TARGETS_TO_BUILD="X86"
-        working-directory: llvm-project/lld/build
-
-      - name: Building LLVM (LLVM LINKERS)
-        run: |
-          ninja -j$(nproc) lld
-          ninja -j$(nproc) wasm-ld
-          
-        working-directory: llvm-project/lld/build
-          
       - name: Preparing for build (LLVM TOOLS)
         run: |
-          cd -
           mkdir llvm-project/llvm/build
           cd llvm-project/llvm/build
           
@@ -62,6 +46,24 @@ jobs:
           ninja -j$(nproc) llvm-dis
           
         working-directory: llvm-project/llvm/build
+
+      - name: Preparing for build (LLVM LINKERS)
+        run: |
+          cd - 
+          mkdir llvm-project/lld/build
+          cd llvm-project/lld/build
+          
+      - name: Configuring CMake (LLVM LINKERS)
+        run: |
+          cmake ../CMakeLists.txt -G Ninja -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_TARGETS_TO_BUILD="X86"
+        working-directory: llvm-project/lld/build
+
+      - name: Building LLVM (LLVM LINKERS)
+        run: |
+          ninja -j$(nproc) lld
+          ninja -j$(nproc) wasm-ld
+          
+        working-directory: llvm-project/lld/build
 
       - name: Releasing
         uses: softprops/action-gh-release@v2
