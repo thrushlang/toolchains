@@ -34,7 +34,7 @@ jobs:
           sudo apt-get remove -y llvm-16* clang-16*
           sudo rm -rf /usr/lib/llvm-16
 
-      - name: Preparing for build (LLVM TOOLS)
+      - name: Preparing for build (LLVM-C API)
         run: |
           mkdir build
           cd build
@@ -47,6 +47,7 @@ jobs:
 
       - name: Building LLVM-C API
         run: |
+          ninja -t targets
           ninja -j$(nproc) llvm-libraries
           ninja -j$(nproc) llvm-config
         working-directory: llvm-project/llvm/build
