@@ -1,7 +1,9 @@
 name: Build LLVM-C Linux API
 
 on:
-  workflow_dispatch:
+  push:
+    tags:
+      - 'LLVM-C-API-Linux-v*.*.*'
 
 jobs:
   build-llvm:
@@ -16,7 +18,7 @@ jobs:
     steps:
       - name: Generating Unique ID
         run: |
-          BUILD_ID="$GITHUB_RUN_NUMBER.$GITHUB_RUN_ATTEMPT"
+          BUILD_ID=${GITHUB_REF#refs/tags/v}
           echo "BUILD_ID=$BUILD_ID" >> $GITHUB_ENV
     
       - name: Downloading LLVM project
@@ -64,16 +66,16 @@ jobs:
 
       - name: Packaging LLVM-C API (Includes)
         run: |
-          tar --format=pax -cJf includes.tar.xz --exclude='*/*.o' --exclude='*/*.cmake' --exclude='*/*.d' dist/include
-        working-directory: llvm-project/llvm
+          tar --format=pax -cJf includes.tar.xz --exclude='*/*.o' --exclude='*/*.cmake' --exclude='*/*.d' include
+        working-directory: llvm-project/llvm/dist
 
-      - name: Releasing Linux LLVM-C API
+      - name: Releasing LLVM-C API
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ format('linux-llvm-c-api{0}', env.BUILD_ID) }}
-          name: ${{ format('Linux LLVM-C API v{0}', env.BUILD_ID) }}
+          tag_name: ${{ env.BUILD_ID }}
+          name: ${{ env.BUILD_ID }}
           body: |
-            ## Linux LLVM-C API
+            ## LLVM-C API
            
             LLVM-C API (v17.0.6) libraries for Linux x86_64 environments.
             
