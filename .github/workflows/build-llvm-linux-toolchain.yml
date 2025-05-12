@@ -9,28 +9,87 @@ jobs:
 
     permissions:
       contents: write
-
+  
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
-
+  
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Build
-        run: echo ${{ github.sha }} > Release.txt
-      - name: Test
-        run: cat Release.txt
-      - name: Create GitHub Release
+      - name: Downloading LLVM project
+        run: |
+          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/llvm-project-17.0.6.src.tar.xz
+
+      - name: Unpacking LLVM project 
+        run: |
+          tar -xf llvm-project-17.0.6.src.tar.xz
+          mv llvm-project-17.0.6.src llvm-project
+
+      - name: Installing dependencies
+        run: |
+          sudo apt-get install -y build-essential cmake ninja-build python3 libz-dev clang
+
+      - name: Preparing for build (LLVM LINKERS)
+        run: |
+          mkdir llvm-project/lld/build
+          mkdir llvm-project/lld/dist
+          cd llvm-project/lld/build
+          
+      - name: Configuring CMake (LLVM LINKERS)
+        run: |
+          cmake ../CMakeLists.txt -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_INSTALL_PREFIX="../dist" -DLLVM_BUILD_TESTS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_DOCS=OFF
+        working-directory: llvm-project/lld/build
+
+      - name: Building LLVM (LLVM LINKERS)
+        run: |
+          ninja -j$(nproc) lld
+          ninja -j$(nproc) wasm-ld
+          
+        working-directory: llvm-project/lld/build
+          
+      - name: Preparing for build (LLVM TOOLS)
+        run: |
+          cd -
+          mkdir llvm-project/llvm/build
+          cd llvm-project/llvm/build
+          
+      - name: Configuring CMake (LLVM TOOLS)
+        run: |
+          cmake ../CMakeLists.txt -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DLLVM_ENABLE_PROJECTS="llvm" -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_INSTALL_PREFIX="../dist" -DLLVM_BUILD_TESTS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_DOCS=OFF -DLLVM_INSTALL_TOOLCHAIN_ONLY=ON -DLLVM_ENABLE_RUNTIMES="libc"
+        working-directory: llvm-project/llvm/build
+
+      - name: Building LLVM (TOOLS)
+        run: |
+          ninja -j$(nproc) llc
+          ninja -j$(nproc) opt
+          ninja -j$(nproc) llvm-dis
+          
+        working-directory: llvm-project/llvm/build
+
+      - name: Releasing
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ format('linux-llvm-{0}', github.run_id) }}
-          name: "LLVM LLC Tool (Minimal Build)"
+          name: "Linux LLVM Toolchain"
           body: |
-            Binario **llc** compilado en modo mínimo.
-            - Versión: LLVM 17.0.6
-            - Sistema: Ubuntu Linux
-            - Compilador: Clang/GCC (auto-detectado)
+            ## Optimized LLVM Toolchain Build
+           
+            **Production-ready** binaries compiled with maximum optimizations for Linux environments. Contains only essential tools to minimize footprint.
+      
+            ### Components
+      
+            **Core LLVM Tools:**
+            - `llc`: LLVM static compiler (transforms LLVM IR to target machine code)
+            - `opt`: LLVM optimizer (performs IR-level optimizations)
+            - `llvm-dis`: Bitcode disassembler (converts .bc files to readable IR)
+      
+            **Linking Utilities:**
+            - `lld`: High-performance cross-platform linker (supports ELF, Mach-O, COFF)
+            - `wasm-ld`: Specialized linker for WebAssembly projects
+            
           files: |
-            LICENSE.txt
-          draft: false       # Release público
-          prerelease: false  # No es una versión preliminar
+            llvm-project/lld/build/bin/lld
+            llvm-project/lld/build/bin/wasm-ld
+            llvm-project/llvm/build/bin/llc
+            llvm-project/llvm/build/bin/opt
+            llvm-project/llvm/build/bin/llvm-dis
+            
+          draft: false
