@@ -51,11 +51,16 @@ jobs:
           ninja -j$(nproc) llvm-config
         working-directory: llvm-project/llvm/build
 
-      - name: Packaging LLVM-C API
+      - name: Packaging LLVM-C API (Libraries)
         run: |
-          tar --format=pax -cJf libs.tar.xz --exclude='*.o' lib
-          tar --format=pax -cJf includes.tar.xz --exclude='*.o' include
+          tar --format=pax -cJf libs.tar.xz --exclude='*/*.o' --exclude='*/*.cmake' --exclude='*/*.d'' lib
+          tar --format=pax -cJf includes.tar.xz --exclude='*/*.o' --exclude='*/*.cmake' --exclude='*/*.d' include
         working-directory: llvm-project/llvm/build
+
+      - name: Packaging LLVM-C API (Includes)
+        run: |
+          tar --format=pax -cJf includes.tar.xz --exclude='*/*.o' --exclude='*/*.cmake' --exclude='*/*.d' dist/include build/include
+        working-directory: llvm-project/llvm
 
       - name: Releasing Linux LLVM-C API
         uses: softprops/action-gh-release@v2
@@ -70,6 +75,6 @@ jobs:
           files: |
             llvm-project/llvm/build/bin/llvm-config
             llvm-project/llvm/build/libs.tar.xz
-            llvm-project/llvm/build/includes.tar.xz
+            llvm-project/llvm/includes.tar.xz
             
           draft: false
