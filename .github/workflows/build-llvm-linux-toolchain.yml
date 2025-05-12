@@ -65,7 +65,7 @@ jobs:
 
       - name: Building LLVM (LLVM LINKERS)
         run: |
-          ninja -j$(nproc) lld
+          ninja -j$(nproc)
         working-directory: llvm-project/lld/build
  
       - name: Packaging LLVM (LLVM Linker Libraries)
