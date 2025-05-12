@@ -1,7 +1,9 @@
-name: Build LLVM Linux Toolchain
+name: Build LLVM (Linux)
 
 on:
-  workflow_dispatch:
+  push:
+    tags:
+      - 'LLVM (Linux) v*.*.*'
 
 jobs:
   build-llvm:
@@ -16,7 +18,7 @@ jobs:
     steps:
       - name: Generating Unique Identification
         run: |
-          BUILD_ID="$GITHUB_RUN_NUMBER.$GITHUB_RUN_ATTEMPT"
+          BUILD_ID=${GITHUB_REF#refs/tags/v}
           echo "BUILD_ID=$BUILD_ID" >> $GITHUB_ENV
     
       - name: Downloading LLVM project
@@ -66,10 +68,10 @@ jobs:
       - name: Releasing LLVM Toolchain
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ format('linux-llvm-{0}', env.BUILD_ID) }}
-          name: ${{ format('Linux LLVM Toolchain v{0}', env.BUILD_ID) }}
+          tag_name: ${{ env.BUILD_ID }}
+          name: ${{ env.BUILD_ID }}
           body: |
-            ## Linux LLVM Toolchain
+            ## LLVM Toolchain (Linux)
            
             LLVM (v17.0.6) binaries compiled with maximum optimizations for Linux environments.
       
