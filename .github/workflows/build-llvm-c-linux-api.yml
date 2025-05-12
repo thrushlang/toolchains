@@ -53,7 +53,7 @@ jobs:
 
       - name: Packaging LLVM-C API
         run: |
-          tar -cJf --best lib -o libs.tar.xz
+          tar --format=pax -cJf libs.tar.xz --exclude='*.o' lib
         working-directory: llvm-project/llvm/build
 
       - name: Releasing Linux LLVM-C API
