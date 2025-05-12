@@ -70,7 +70,7 @@ jobs:
  
       - name: Packaging LLVM (LLVM Linker Libraries)
         run: |
-          tar --format=pax -cJf linkers_libs.tar.xz --exclude='*/*.o' --exclude='*/*.cmake' --exclude='*/*.d'' lib
+          tar --format=pax -cJf linkers_libs.tar.xz --exclude='*/*.o' --exclude='*/*.cmake' --exclude='*/*.d' lib
         working-directory: llvm-project/lld/build
 
       - name: Optimizing LLVM (LLVM TOOLS & LINKERS)
