@@ -59,7 +59,7 @@ jobs:
 
       - name: Packaging LLVM-C API (Libraries)
         run: |
-          tar --format=pax -cJf libs.tar.xz --exclude='*/*.o' --exclude='*/*.cmake' --exclude='*/*.d'' lib
+          tar --format=pax -cJf libs.tar.xz --exclude='*/*.o' --exclude='*/*.cmake' --exclude='*/*.d' lib
         working-directory: llvm-project/llvm/build
 
       - name: Packaging LLVM-C API (Includes)
