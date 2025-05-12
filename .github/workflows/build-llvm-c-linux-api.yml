@@ -1,0 +1,73 @@
+name: Build LLVM-C Linux API
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-llvm:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+  
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+  
+    steps:
+      - name: Generating Unique ID
+        run: |
+          BUILD_ID="$GITHUB_RUN_NUMBER.$GITHUB_RUN_ATTEMPT"
+          echo "BUILD_ID=$BUILD_ID" >> $GITHUB_ENV
+    
+      - name: Downloading LLVM project
+        run: |
+          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/llvm-project-17.0.6.src.tar.xz
+
+      - name: Unpacking LLVM project 
+        run: |
+          tar -xf llvm-project-17.0.6.src.tar.xz
+          mv llvm-project-17.0.6.src llvm-project
+
+      - name: Installing dependencies
+        run: |
+          sudo apt-get install -y build-essential cmake ninja-build python3 libz-dev binutils xz-utils 
+          sudo apt-get remove -y llvm-16* clang-16*
+          sudo rm -rf /usr/lib/llvm-16
+
+      - name: Preparing for build (LLVM TOOLS)
+        run: |
+          mkdir build
+          cd build
+        working-directory: llvm-project/llvm
+          
+      - name: Configuring CMake (LLVM-C API)
+        run: |
+          cmake ../CMakeLists.txt -G Ninja -DLLVM_ENABLE_PROJECTS="llvm" -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_BUILD_TESTS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_DOCS=OFF -DLLVM_INSTALL_TOOLCHAIN_ONLY=ON -DLLVM_ENABLE_RUNTIMES="libc"
+        working-directory: llvm-project/llvm/build
+
+      - name: Building LLVM-C API
+        run: |
+          ninja -j$(nproc) llvm-libraries
+          ninja -j$(nproc) llvm-config
+        working-directory: llvm-project/llvm/build
+
+      - name: Packaging LLVM-C API
+        run: |
+          tar -cJf --best libs.tar.xz lib
+        working-directory: llvm-project/llvm/build
+
+      - name: Releasing Linux LLVM-C API
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ format('linux-llvm-c-api{0}', env.BUILD_ID) }}
+          name: ${{ format('Linux LLVM-C API v{0}', env.BUILD_ID) }}
+          body: |
+            ## Linux LLVM-C API
+           
+            LLVM-C API (v17.0.6) libraries for Linux x86_64 environments.
+            
+          files: |
+            llvm-project/llvm/build/bin/llvm-config
+            llvm-project/llvm/build/libs.tar.xz
+            
+          draft: false
