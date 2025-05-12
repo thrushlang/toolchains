@@ -25,7 +25,7 @@ jobs:
 
       - name: Installing dependencies
         run: |
-          sudo apt-get install -y build-essential cmake ninja-build python3 libz-dev
+          sudo apt-get install -y build-essential cmake ninja-build python3 libz-dev binutils
           sudo apt-get remove -y llvm-16* clang-16*
           sudo rm -rf /usr/lib/llvm-16
 
@@ -63,6 +63,11 @@ jobs:
           ninja -j$(nproc) lld
         working-directory: llvm-project/lld/build
 
+      - name: Optimizing LLVM (LLVM TOOLS & LINKERS)
+        run: |
+          strip lld/build/bin/lld lld/build/bin/wasm-ld llvm/build/bin/llc llvm/build/bin/opt llvm/build/bin/llvm-dis
+        working-directory: llvm-project/
+
       - name: Releasing
         uses: softprops/action-gh-release@v2
         with:
@@ -71,7 +76,7 @@ jobs:
           body: |
             ## Optimized LLVM Toolchain Build
            
-            **Production-ready** binaries compiled with maximum optimizations for Linux environments. Contains only essential tools to minimize footprint.
+            **Production-ready** LLVM binaries compiled with maximum optimizations for Linux environments.
       
             ### Components
       
@@ -86,6 +91,7 @@ jobs:
             
           files: |
             llvm-project/lld/build/bin/lld
+            llvm-project/lld/build/bin/wasm-ld
             llvm-project/llvm/build/bin/llc
             llvm-project/llvm/build/bin/opt
             llvm-project/llvm/build/bin/llvm-dis
