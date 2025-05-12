@@ -85,9 +85,9 @@ jobs:
             - `wasm-ld`: Specialized linker for WebAssembly projects
             
           files: |
-            llvm-project/lld/build/bin/lld
-            llvm-project/lld/build/bin/wasm-ld
-            llvm-project/lld/build/linkers_libraries.tar.xz
+            llvm-project/llvm/build/bin/lld
+            llvm-project/llvm/build/bin/wasm-ld
+            llvm-project/llvm/build/linkers_libraries.tar.xz
             llvm-project/llvm/build/bin/llc
             llvm-project/llvm/build/bin/opt
             llvm-project/llvm/build/bin/llvm-dis
