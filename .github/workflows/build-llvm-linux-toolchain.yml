@@ -16,7 +16,8 @@ jobs:
     steps:
       - name: Generating Unique Identification
         run: |
-          echo "BUILD_ID=$GITHUB_RUN_NUMBER.$GITHUB_RUN_ATTEMPT" >> $GITHUB_ENV
+          BUILD_ID="$GITHUB_RUN_NUMBER.$GITHUB_RUN_ATTEMPT"
+          echo "BUILD_ID=$BUILD_ID" >> $GITHUB_ENV
     
       - name: Downloading LLVM project
         run: |
