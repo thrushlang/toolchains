@@ -3,7 +3,7 @@ name: Build LLVM (Linux)
 on:
   push:
     tags:
-      - 'LLVM (Linux) v*.*.*'
+      - 'LLVM-Linux-v*.*.*'
 
 jobs:
   build-llvm:
