@@ -50,7 +50,7 @@ jobs:
           
       - name: Configuring CMake
         run: |
-          cmake ../CMakeLists.txt -G Ninja -DCMAKE_C_COMPILER="gcc" -DCMAKE_CXX_COMPILER="g++" -DLLVM_INCLUDE_UTILS=OFF -DLLVM_ENABLE_PROJECTS="lld;clang" -DCMAKE_C_FLAGS="-Os -fno-exceptions -fomit-frame-pointer -fdata-sections -ffunction-sections" -DCMAKE_CXX_FLAGS="-static-libgcc -static-libstdc++ -Os -fno-exceptions -fomit-frame-pointer -fdata-sections -ffunction-sections -fno-rtti" -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_BUILD_TESTS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_DOCS=OFF -DLLVM_ENABLE_RUNTIMES="libc"
+          cmake ../CMakeLists.txt -G Ninja -DCMAKE_C_COMPILER="gcc" -DCMAKE_CXX_COMPILER="g++" -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE -DLLVM_ENABLE_LIBXML2=0 -DLLVM_INCLUDE_UTILS=OFF -DLLVM_ENABLE_PROJECTS="lld;clang" -DCMAKE_C_FLAGS="-Os -fno-exceptions -fomit-frame-pointer -fdata-sections -ffunction-sections" -DCMAKE_CXX_FLAGS="-static-libgcc -static-libstdc++ -Os -fno-exceptions -fomit-frame-pointer -fdata-sections -ffunction-sections -fno-rtti" -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_BUILD_TESTS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_BENCHMARKS=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_DOCS=OFF -DLLVM_ENABLE_RUNTIMES="libc"
         working-directory: llvm-project/llvm/build
 
       - name: Building LLVM
@@ -59,12 +59,7 @@ jobs:
           ninja -j$(nproc) lld
         working-directory: llvm-project/llvm/build
 
-      - name: Packaging LLVM (LLVM Linker Libraries)
-        run: |
-          tar --format=pax -cJf linkers_libraries.tar.xz --exclude='*/*.o' --exclude='*/*.cmake' --exclude='*/*.d' lib
-        working-directory: llvm-project/llvm/build
-
-      - name: Optimizing LLVM (LLVM TOOLS, LINKERS & Clang)
+      - name: Optimizing LLVM (LLVM LINKERS & Clang)
         run: |
           strip --strip-all llvm/build/bin/clang llvm/build/bin/ld.lld llvm/build/bin/wasm-ld
         working-directory: llvm-project/
