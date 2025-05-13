@@ -69,7 +69,7 @@ jobs:
 
       - name: Optimizing LLVM (LLVM TOOLS & LINKERS)
         run: |
-          strip llvm/build/bin/lld llvm/build/bin/wasm-ld llvm/build/bin/llc llvm/build/bin/opt llvm/build/bin/llvm-dis
+          strip llvm/build/bin/lld llvm/build/bin/ld.lld llvm/build/bin/wasm-ld llvm/build/bin/llc llvm/build/bin/opt llvm/build/bin/llvm-dis
         working-directory: llvm-project/
           
       - name: Releasing LLVM Toolchain
