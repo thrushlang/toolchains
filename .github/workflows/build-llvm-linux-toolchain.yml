@@ -55,6 +55,7 @@ jobs:
 
       - name: Building LLVM
         run: |
+          ninja -j$(nproc) ld.lld
           ninja -j$(nproc) lld
           ninja -j$(nproc) llc
           ninja -j$(nproc) opt
@@ -93,6 +94,7 @@ jobs:
             - `wasm-ld`: Specialized linker for WebAssembly projects
             
           files: |
+            llvm-project/llvm/build/bin/ld.lld
             llvm-project/llvm/build/bin/lld
             llvm-project/llvm/build/bin/wasm-ld
             llvm-project/llvm/build/linkers_libraries.tar.xz
