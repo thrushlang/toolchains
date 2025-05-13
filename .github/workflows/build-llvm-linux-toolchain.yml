@@ -50,15 +50,13 @@ jobs:
           
       - name: Configuring CMake
         run: |
-          cmake ../CMakeLists.txt -G Ninja -DLLVM_ENABLE_PROJECTS="llvm;lld;clang" -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_BUILD_TESTS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_DOCS=OFF -DLLVM_ENABLE_RUNTIMES="libc"
+          cmake ../CMakeLists.txt -G Ninja -DCMAKE_C_COMPILER="gcc" -DCMAKE_CXX_COMPILER="g++" -DLLVM_ENABLE_PROJECTS="lld;clang" -DCMAKE_C_FLAGS="-Os -fno-exceptions -fomit-frame-pointer -fdata-sections -ffunction-sections" -DCMAKE_CXX_FLAGS="-static-libgcc -static-libstdc++ -Wl,-Bstatic -lmylib -Wl,-Bdynamic -ldynlib -Os -fno-exceptions -fomit-frame-pointer -fdata-sections -ffunction-sections -fno-rtti" -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_BUILD_TESTS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_DOCS=OFF -DLLVM_ENABLE_RUNTIMES="libc"
         working-directory: llvm-project/llvm/build
 
       - name: Building LLVM
         run: |
           ninja -j$(nproc) clang
           ninja -j$(nproc) lld
-          ninja -j$(nproc) opt
-          ninja -j$(nproc) llvm-dis
         working-directory: llvm-project/llvm/build
 
       - name: Packaging LLVM (LLVM Linker Libraries)
@@ -68,7 +66,7 @@ jobs:
 
       - name: Optimizing LLVM (LLVM TOOLS, LINKERS & Clang)
         run: |
-          strip --strip-all llvm/build/bin/clang llvm/build/bin/lld llvm/build/bin/ld.lld llvm/build/bin/wasm-ld llvm/build/bin/opt llvm/build/bin/llvm-dis
+          strip --strip-all llvm/build/bin/clang llvm/build/bin/ld.lld llvm/build/bin/wasm-ld
         working-directory: llvm-project/
           
       - name: Releasing LLVM Toolchain
@@ -82,23 +80,14 @@ jobs:
             LLVM (v17.0.6) binaries compiled with maximum optimizations for Linux environments.
       
             ### Components
-      
-            **Core LLVM Tools:**
-            - `llc`: LLVM static compiler (transforms LLVM IR to target machine code)
-            - `opt`: LLVM optimizer (performs IR-level optimizations)
-            - `llvm-dis`: Bitcode disassembler (converts .bc files to readable IR)
-      
-            **Linking Utilities:**
-            - `lld`: High-performance cross-platform linker (supports ELF, Mach-O, COFF)
-            - `wasm-ld`: Specialized linker for WebAssembly projects
+
+            - `clang`: LLVM modern frontend compiler.
+            - `ld.lld`: High-performance linker for x86_64 architectures.
+            - `wasm-ld`: Wasmer linker.
             
           files: |
             llvm-project/llvm/build/bin/clang
             llvm-project/llvm/build/bin/ld.lld
-            llvm-project/llvm/build/bin/lld
             llvm-project/llvm/build/bin/wasm-ld
-            llvm-project/llvm/build/linkers_libraries.tar.xz
-            llvm-project/llvm/build/bin/opt
-            llvm-project/llvm/build/bin/llvm-dis
             
           draft: false
