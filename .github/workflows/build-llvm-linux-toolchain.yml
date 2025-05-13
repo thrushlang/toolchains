@@ -6,7 +6,7 @@ on:
       - 'LLVM-LINUX-v*.*.*'
 
 jobs:
-  build-llvm:
+  build-llvm-toolchain:
     runs-on: ubuntu-22.04 
 
     permissions:
