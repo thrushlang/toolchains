@@ -50,7 +50,7 @@ jobs:
           
       - name: Configuring CMake
         run: |
-          cmake ../CMakeLists.txt -G Ninja -DCMAKE_C_COMPILER="gcc" -DCMAKE_CXX_COMPILER="g++" -DLLVM_ENABLE_PROJECTS="lld;clang" -DCMAKE_C_FLAGS="-Os -fno-exceptions -fomit-frame-pointer -fdata-sections -ffunction-sections" -DCMAKE_CXX_FLAGS="-static-libgcc -static-libstdc++ -Os -fno-exceptions -fomit-frame-pointer -fdata-sections -ffunction-sections -fno-rtti" -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_BUILD_TESTS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_DOCS=OFF -DLLVM_ENABLE_RUNTIMES="libc"
+          cmake ../CMakeLists.txt -G Ninja -DCMAKE_C_COMPILER="gcc" -DCMAKE_CXX_COMPILER="g++" -DLLVM_INCLUDE_UTILS=OFF -DLLVM_ENABLE_PROJECTS="lld;clang" -DCMAKE_C_FLAGS="-Os -fno-exceptions -fomit-frame-pointer -fdata-sections -ffunction-sections" -DCMAKE_CXX_FLAGS="-static-libgcc -static-libstdc++ -Os -fno-exceptions -fomit-frame-pointer -fdata-sections -ffunction-sections -fno-rtti" -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_BUILD_TESTS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_DOCS=OFF -DLLVM_ENABLE_RUNTIMES="libc"
         working-directory: llvm-project/llvm/build
 
       - name: Building LLVM
