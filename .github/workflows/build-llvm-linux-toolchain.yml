@@ -56,7 +56,6 @@ jobs:
       - name: Building LLVM
         run: |
           ninja -j$(nproc) ld.lld
-          ninja -j$(nproc) lld
           ninja -j$(nproc) llc
           ninja -j$(nproc) opt
           ninja -j$(nproc) llvm-dis
