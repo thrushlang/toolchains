@@ -113,7 +113,7 @@ if "%CMAKE_USE_ARCH_OPTIONS%" == "" (set CMAKE_GENERATOR=%CMAKE_GENERATOR%%CMAKE
 if not "%CMAKE_USE_ARCH_OPTIONS%" == "" (set CMAKE_OPTIONS=%CMAKE_OPTIONS%%CMAKE_ARCH_OPTIONS%)
 
 set TAR_SUFFIX=.tar.xz
-perl compare-versions.pl %LLVM_VERSION% 3.5.0
+perl windows/compare-versions.pl %LLVM_VERSION% 3.5.0
 if %errorlevel% == -1 set TAR_SUFFIX=.tar.gz
 
 set BASE_DOWNLOAD_URL=https://github.com/llvm/llvm-project/releases/download/llvmorg-%LLVM_VERSION%
@@ -127,7 +127,7 @@ if %LLVM_VERSION% == 8.0.0 set BASE_DOWNLOAD_URL=%BASE_DOWNLOAD_URL_LEGACY%
 if %LLVM_VERSION% == 9.0.0 set BASE_DOWNLOAD_URL=%BASE_DOWNLOAD_URL_LEGACY%
 
 set CLANG_DOWNLOAD_FILE_PREFIX=clang-
-perl compare-versions.pl %LLVM_VERSION% 9.0.0
+perl windows/compare-versions.pl %LLVM_VERSION% 9.0.0
 if %errorlevel% == -1 set CLANG_DOWNLOAD_FILE_PREFIX=cfe-
 
 set LLVM_MASTER_URL=https://github.com/llvm/llvm-project
@@ -141,7 +141,7 @@ set LLVM_RELEASE_DIR=%WORKING_DIR%\%LLVM_RELEASE_NAME%
 set LLVM_RELEASE_DIR=%LLVM_RELEASE_DIR:\=/%
 set LLVM_RELEASE_URL=https://github.com/vovkos/llvm-package-windows/releases/download/%LLVM_RELEASE_TAG%/%LLVM_RELEASE_FILE%
 
-perl compare-versions.pl %LLVM_VERSION% 15.0.0
+perl windows/compare-versions.pl %LLVM_VERSION% 15.0.0
 if %errorlevel% == -1 set LLVM_CMAKE_DOWNLOAD_URL=
 
 set LLVM_CMAKE_CRT_FLAGS= -DCMAKE_MSVC_RUNTIME_LIBRARY=%CMAKE_CRT%
