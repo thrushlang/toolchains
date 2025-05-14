@@ -19,10 +19,10 @@ jobs:
                 -   libcmt
 
                 TARGET_CPU:
-                -   x86
+                -  amd64
 
                 CONFIGURATION:
-                -   Release
+                -   MinSizeReel
 
         steps:
         -   name: Checkout repo
