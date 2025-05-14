@@ -18,13 +18,13 @@ jobs:
             fail-fast: false
             matrix:
                 CRT:
-                -   libcmt
+                -  libcmt
 
                 TARGET_CPU:
                 -  amd64
 
                 CONFIGURATION:
-                -   MinSizeRel
+                -  Release
 
         steps:
         -   name: Checkout repo
