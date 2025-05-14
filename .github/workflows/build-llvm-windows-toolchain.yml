@@ -42,10 +42,15 @@ jobs:
                 call %GITHUB_WORKSPACE%\windows\build.bat
                 echo ::set-output name=DEPLOY_FILE::%DEPLOY_FILE%
 
-        -   name: Release
-            uses: softprops/action-gh-release@v1
-            if: startsWith(github.ref, 'refs/tags/')
-            env:
-                GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-            with:
-                files: ${{steps.BUILD.outputs.DEPLOY_FILE}}
+        -  name: Releasing LLVM Toolchain
+           uses: softprops/action-gh-release@v2
+           with:
+              tag_name: ${{ env.BUILD_ID }}
+              name: "LLVM Toolchain (Windows)"
+              body: |
+                ## LLVM Toolchain (Windows)
+               
+                LLVM - Clang (v17.0.6) binaries compiled with maximum optimizations for Windows x86_64 environments.
+                
+              files: ${{steps.BUILD.outputs.DEPLOY_FILE}}
+              draft: false
