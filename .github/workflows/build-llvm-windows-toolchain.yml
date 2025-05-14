@@ -28,6 +28,9 @@ jobs:
         -   name: Checkout repo
             uses: actions/checkout@v3
 
+        -   name: Generating Unique ID
+            run: call %GITHUB_WORKSPACE%\windows\generate-build-id.bat
+
         -   name: Installing LLVM Toolchain
             shell: cmd
             run: |
