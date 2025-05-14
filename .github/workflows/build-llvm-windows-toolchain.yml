@@ -9,10 +9,15 @@ jobs:
     windowsBuild:
         name: Build LLVM Toolchain (Windows)
         runs-on: windows-2022
+
+        permissions:
+          contents: write
+    
         env:
             BUILD_PROJECT: llvm
             BUILD_MASTER: false
             LLVM_VERSION: 17.0.6
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
 
         strategy:
             fail-fast: false
