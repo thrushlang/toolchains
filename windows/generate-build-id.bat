@@ -2,12 +2,12 @@
 setlocal EnableDelayedExpansion
 
 set "GITHUB_REF=%GITHUB_REF%"
-set "TAG_NAME=%GITHUB_REF:refs/tags/=%"
+set "BASE_NAME=%GITHUB_REF:refs/tags/=%"
 
-set "BUILD_ID=%TAG_NAME%-%GITHUB_RUN_ID%"
+set "BUILD_ID=%BASE_NAME%-%GITHUB_RUN_ID%"
 
 echo BUILD_ID=%BUILD_ID%>>%GITHUB_ENV%
-echo TAG_NAME=%TAG_NAME%>>%GITHUB_ENV%
+echo BUILD_ID=%TAG_NAME%>>%GITHUB_ENV%
 
 echo Unique ID: %BUILD_ID%
 echo Base name: %TAG_NAME%
