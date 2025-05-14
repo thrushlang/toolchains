@@ -24,7 +24,7 @@ jobs:
                 -  amd64
 
                 CONFIGURATION:
-                -   MinSizeReel
+                -   MinSizeRel
 
         steps:
         -   name: Checkout repo
