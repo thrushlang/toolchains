@@ -101,7 +101,7 @@ set LLVM_CMAKELISTS_URL=https://raw.githubusercontent.com/llvm/llvm-project/main
 
 if /i "%BUILD_MASTER%" == "true" (
 	powershell "Invoke-WebRequest -Uri %LLVM_CMAKELISTS_URL% -OutFile CMakeLists.txt"
-	for /f %%i in ('perl print-llvm-version.pl CMakeLists.txt') do set LLVM_VERSION=%%i
+	for /f %%i in ('perl windows/print-llvm-version.pl CMakeLists.txt') do set LLVM_VERSION=%%i
 	set LLVM_RELEASE_TAG=llvm-master
 )
 
@@ -118,7 +118,7 @@ if %errorlevel% == -1 set TAR_SUFFIX=.tar.gz
 
 set BASE_DOWNLOAD_URL=https://github.com/llvm/llvm-project/releases/download/llvmorg-%LLVM_VERSION%
 set BASE_DOWNLOAD_URL_LEGACY=http://releases.llvm.org/%LLVM_VERSION%
-perl compare-versions.pl %LLVM_VERSION% 7.1.0
+perl windows/compare-versions.pl %LLVM_VERSION% 7.1.0
 if %errorlevel% == -1 set BASE_DOWNLOAD_URL=%BASE_DOWNLOAD_URL_LEGACY%
 
 :: exceptions: 8.0.0, 9.0.0 are still hosted on llvm.org
@@ -146,7 +146,7 @@ if %errorlevel% == -1 set LLVM_CMAKE_DOWNLOAD_URL=
 
 set LLVM_CMAKE_CRT_FLAGS= -DCMAKE_MSVC_RUNTIME_LIBRARY=%CMAKE_CRT%
 
-perl compare-versions.pl %LLVM_VERSION% 17.0.0
+perl windows/compare-versions.pl %LLVM_VERSION% 17.0.0
 if %errorlevel% == -1 set LLVM_CMAKE_CRT_FLAGS= ^
 	-DLLVM_USE_CRT_DEBUG=%LLVM_CRT%d ^
 	-DLLVM_USE_CRT_RELEASE=%LLVM_CRT% ^
@@ -198,13 +198,13 @@ set CLANG_CMAKE_CONFIGURE_FLAGS= ^
 
 :: . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-perl compare-versions.pl %LLVM_VERSION% 8.0.0
+perl windows/compare-versions.pl %LLVM_VERSION% 8.0.0
 if %errorlevel% == -1 set CLANG_CMAKE_CONFIGURE_FLAGS= ^
 	%CLANG_CMAKE_CONFIGURE_FLAGS% ^
 	-DCLANG_PATH_TO_LLVM_BUILD=%LLVM_RELEASE_DIR% ^
 	-DLLVM_MAIN_SRC_DIR=%LLVM_RELEASE_DIR%
 
-perl compare-versions.pl %LLVM_VERSION% 3.5.0
+perl windows/compare-versions.pl %LLVM_VERSION% 3.5.0
 if %errorlevel% == -1 set CLANG_CMAKE_CONFIGURE_FLAGS= ^
 	%CLANG_CMAKE_CONFIGURE_FLAGS% ^
 	-DLLVM_CONFIG=%LLVM_RELEASE_DIR%/bin/llvm-config
