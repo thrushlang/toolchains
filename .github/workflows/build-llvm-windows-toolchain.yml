@@ -5,7 +5,7 @@ on:
 
 jobs:
     windowsBuild:
-        name: Windows Build
+        name: Build LLVM Toolchain (Windows)
         runs-on: windows-2022
         env:
             BUILD_PROJECT: llvm
