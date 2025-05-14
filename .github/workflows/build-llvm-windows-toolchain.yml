@@ -1,7 +1,9 @@
 name: Build LLVM Toolchain (Windows)
 
 on:
-    workflow_dispatch:
+  push:
+    tags:
+      - 'LLVM-WINDOWS-v*.*.*'
 
 jobs:
     windowsBuild:
