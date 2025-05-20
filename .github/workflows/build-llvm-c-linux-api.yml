@@ -1,4 +1,4 @@
-name: Build LLVM-C API (Linux)
+name: LLVM-C API (Linux)
 
 on:
   push:
