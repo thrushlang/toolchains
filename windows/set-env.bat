@@ -72,8 +72,6 @@ goto :loop
 set CONFIGURATION=Release
 set DEBUG_SUFFIX=
 set LLVM_TARGETS=X86;NVPTX;AMDGPU
-set LLVM_CMAKE_CONFIGURE_EXTRA_FLAGS=
-set CLANG_CMAKE_CONFIGURE_EXTRA_FLAGS=
 shift
 goto :loop
 
@@ -85,7 +83,6 @@ set CONFIGURATION=Debug
 set DEBUG_SUFFIX=-dbg
 set LLVM_TARGETS=X86
 set LLVM_CMAKE_CONFIGURE_EXTRA_FLAGS=-DLLVM_BUILD_TOOLS=OFF
-set CLANG_CMAKE_CONFIGURE_EXTRA_FLAGS=-DCLANG_BUILD_TOOLS=OFF
 shift
 goto :loop
 
@@ -157,6 +154,7 @@ set LLVM_CMAKE_CONFIGURE_FLAGS= ^
 	-G "%CMAKE_GENERATOR%" ^
 	%CMAKE_OPTIONS% ^
 	-Thost=x64 ^
+	-DLLVM_ENABLE_PROJECTS="llvm;lld"
 	-DCMAKE_INSTALL_PREFIX=%LLVM_RELEASE_DIR% ^
 	-DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE ^
 	-DLLVM_TARGETS_TO_BUILD=%LLVM_TARGETS% ^
@@ -175,39 +173,12 @@ set LLVM_CMAKE_CONFIGURE_FLAGS= ^
 
 :: . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-set CLANG_MASTER_URL=https://github.com/llvm-mirror/clang
-set CLANG_DOWNLOAD_FILE=%CLANG_DOWNLOAD_FILE_PREFIX%%LLVM_VERSION%.src%TAR_SUFFIX%
-set CLANG_DOWNLOAD_URL=%BASE_DOWNLOAD_URL%/%CLANG_DOWNLOAD_FILE%
-set CLANG_RELEASE_NAME=clang-%LLVM_VERSION%-windows-%TARGET_CPU%-%TOOLCHAIN%-%CRT%%DEBUG_SUFFIX%
-set CLANG_RELEASE_FILE=%CLANG_RELEASE_NAME%.7z
-set CLANG_RELEASE_DIR=%WORKING_DIR%\%CLANG_RELEASE_NAME%
-set CLANG_RELEASE_DIR=%CLANG_RELEASE_DIR:\=/%
-
-set CLANG_CMAKE_CONFIGURE_FLAGS= ^
-	-G "%CMAKE_GENERATOR%" ^
-	%CMAKE_OPTIONS% ^
-	-DCMAKE_INSTALL_PREFIX=%CLANG_RELEASE_DIR% ^
-	-DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE ^
-	-DLLVM_INCLUDE_TESTS=OFF ^
-	-DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=ON ^
-	-DCLANG_INCLUDE_DOCS=OFF ^
-	-DCLANG_INCLUDE_TESTS=OFF ^
-	-DLLVM_DIR=%LLVM_RELEASE_DIR%/lib/cmake/llvm ^
-	%LLVM_CMAKE_CRT_FLAGS% ^
-	%CLANG_CMAKE_CONFIGURE_EXTRA_FLAGS%
-
-:: . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
 perl windows/compare-versions.pl %LLVM_VERSION% 8.0.0
-if %errorlevel% == -1 set CLANG_CMAKE_CONFIGURE_FLAGS= ^
-	%CLANG_CMAKE_CONFIGURE_FLAGS% ^
-	-DCLANG_PATH_TO_LLVM_BUILD=%LLVM_RELEASE_DIR% ^
+if %errorlevel% == -1 set -DCLANG_PATH_TO_LLVM_BUILD=%LLVM_RELEASE_DIR% ^
 	-DLLVM_MAIN_SRC_DIR=%LLVM_RELEASE_DIR%
 
 perl windows/compare-versions.pl %LLVM_VERSION% 3.5.0
-if %errorlevel% == -1 set CLANG_CMAKE_CONFIGURE_FLAGS= ^
-	%CLANG_CMAKE_CONFIGURE_FLAGS% ^
-	-DLLVM_CONFIG=%LLVM_RELEASE_DIR%/bin/llvm-config
+if %errorlevel% == -1 set -DLLVM_CONFIG=%LLVM_RELEASE_DIR%/bin/llvm-config
 
 set CMAKE_BUILD_FLAGS= ^
 	--config %CONFIGURATION% ^
@@ -218,7 +189,6 @@ set CMAKE_BUILD_FLAGS= ^
 	/consoleloggerparameters:Summary
 
 if /i "%BUILD_PROJECT%" == "llvm" set DEPLOY_FILE=%LLVM_RELEASE_FILE%
-if /i "%BUILD_PROJECT%" == "clang" set DEPLOY_FILE=%CLANG_RELEASE_FILE%
 
 echo ---------------------------------------------------------------------------
 echo LLVM_VERSION:                %LLVM_VERSION%
@@ -228,10 +198,6 @@ echo LLVM_CMAKE_DOWNLOAD_URL:     %LLVM_CMAKE_DOWNLOAD_URL%
 echo LLVM_RELEASE_FILE:           %LLVM_RELEASE_FILE%
 echo LLVM_RELEASE_URL:            %LLVM_RELEASE_URL%
 echo LLVM_CMAKE_CONFIGURE_FLAGS:  %LLVM_CMAKE_CONFIGURE_FLAGS%
-echo ---------------------------------------------------------------------------
-echo CLANG_DOWNLOAD_URL:          %CLANG_DOWNLOAD_URL%
-echo CLANG_RELEASE_FILE:          %CLANG_RELEASE_FILE%
-echo CLANG_CMAKE_CONFIGURE_FLAGS: %CLANG_CMAKE_CONFIGURE_FLAGS%
 echo ---------------------------------------------------------------------------
 echo DEPLOY_FILE: %DEPLOY_FILE%
 echo ---------------------------------------------------------------------------
