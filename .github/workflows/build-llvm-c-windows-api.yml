@@ -1,0 +1,132 @@
+name: Build LLVM-C API (Windows)
+
+on:
+  push:
+    tags:
+      - 'LLVM-C-API-WINDOWS-v*.*.*'
+
+jobs:
+  build-llvm:
+    runs-on: windows-2022
+
+    permissions:
+      contents: write
+  
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
+    steps:
+      - name: Generating Unique ID
+        shell: pwsh
+        run: |
+          $BASE_NAME = "${{ github.ref }}".Replace('refs/tags/', '')
+          $BUILD_ID = "${BASE_NAME}-${{ github.run_id }}"
+          
+          echo "BUILD_ID=$BUILD_ID" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "BASE_NAME=$BASE_NAME" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+          echo "Unique ID: $BUILD_ID"
+          echo "Base name: $BASE_NAME"
+    
+      - name: Set up build environment
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Ninja
+        shell: pwsh
+        run: |
+          pip install ninja
+          ninja --version
+
+      - name: Install CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Downloading LLVM project
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/llvm-project-17.0.6.src.tar.xz" -OutFile "llvm-project-17.0.6.src.tar.xz"
+
+      - name: Install 7zip
+        shell: pwsh
+        run: |
+          choco install 7zip -y
+
+      - name: Unpacking LLVM project
+        shell: pwsh
+        run: |
+          7z x llvm-project-17.0.6.src.tar.xz -so | 7z x -si -ttar
+          Rename-Item -Path "llvm-project-17.0.6.src" -NewName "llvm-project"
+
+      - name: Preparing for build (LLVM-C API)
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path "llvm-project\llvm\build" -Force
+          New-Item -ItemType Directory -Path "llvm-project\llvm\dist" -Force
+        
+      - name: Configuring CMake (LLVM C API)
+        shell: pwsh
+        run: |
+          cd llvm-project\llvm\build
+          cmake ..\CMakeLists.txt -G Ninja `
+            -DLLVM_ENABLE_PROJECTS="llvm;lld" `
+            -DLLVM_ENABLE_TERMINFO=OFF `
+            -DLLVM_ENABLE_ZLIB=OFF `
+            -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE `
+            -DLLVM_ENABLE_LIBXML2=0 `
+            -DLLVM_INCLUDE_UTILS=OFF `
+            -DCMAKE_INSTALL_PREFIX="..\dist" `
+            -DCMAKE_BUILD_TYPE=MinSizeRel `
+            -DLLVM_TARGETS_TO_BUILD="X86" `
+            -DLLVM_BUILD_TESTS=OFF `
+            -DLLVM_BUILD_EXAMPLES=OFF `
+            -DLLVM_INCLUDE_TESTS=OFF `
+            -DLLVM_INCLUDE_EXAMPLES=OFF `
+            -DLLVM_INCLUDE_DOCS=OFF
+
+      - name: Building LLVM C API
+        shell: pwsh
+        run: |
+          cd llvm-project\llvm\build
+          
+          ninja -j $env:NUMBER_OF_PROCESSORS liblldCOFF.lib liblldCommon.lib liblldELF.lib liblldMachO.lib liblldMinGW.lib liblldWasm.lib
+          ninja -j $env:NUMBER_OF_PROCESSORS LLVMAggressiveInstCombine.lib LLVMAnalysis.lib LLVMAsmParser.lib LLVMAsmPrinter.lib LLVMBinaryFormat.lib LLVMBitReader.lib LLVMBitWriter.lib LLVMBitstreamReader.lib LLVMCFGuard.lib LLVMCFIVerify.lib LLVMCodeGen.lib LLVMCodeGenTypes.lib LLVMCore.lib LLVMCoroutines.lib LLVMCoverage.lib LLVMDWARFLinker.lib LLVMDWARFLinkerParallel.lib LLVMDWP.lib LLVMDebugInfoBTF.lib LLVMDebugInfoCodeView.lib LLVMDebugInfoDWARF.lib LLVMDebugInfoGSYM.lib LLVMDebugInfoLogicalView.lib LLVMDebugInfoMSF.lib LLVMDebugInfoPDB.lib LLVMDebuginfod.lib LLVMDemangle.lib LLVMDiff.lib LLVMDlltoolDriver.lib LLVMExecutionEngine.lib LLVMExegesis.lib LLVMExegesisX86.lib LLVMExtensions.lib LLVMFileCheck.lib LLVMFrontendHLSL.lib LLVMFrontendOpenACC.lib LLVMFrontendOpenMP.lib LLVMFuzzMutate.lib LLVMFuzzerCLI.lib LLVMGlobalISel.lib LLVMIRPrinter.lib LLVMIRReader.lib LLVMInstCombine.lib LLVMInstrumentation.lib LLVMInterfaceStub.lib LLVMInterpreter.lib LLVMJITLink.lib LLVMLTO.lib LLVMLibDriver.lib LLVMLineEditor.lib LLVMLinker.lib LLVMMC.lib LLVMMCA.lib LLVMMCDisassembler.lib LLVMMCJIT.lib LLVMMCParser.lib LLVMMIRParser.lib LLVMObjCARCOpts.lib LLVMObjCopy.lib LLVMObject.lib LLVMObjectYAML.lib LLVMOption.lib LLVMOrcJIT.lib LLVMOrcShared.lib LLVMOrcTargetProcess.lib LLVMPasses.lib LLVMProfileData.lib LLVMRemarks.lib LLVMRuntimeDyld.lib LLVMScalarOpts.lib LLVMSelectionDAG.lib LLVMSupport.lib LLVMSymbolize.lib LLVMTableGen.lib LLVMTableGenCommon.lib LLVMTableGenGlobalISel.lib LLVMTarget.lib LLVMTargetParser.lib LLVMTextAPI.lib LLVMTransformUtils.lib LLVMVectorize.lib LLVMWindowsDriver.lib LLVMWindowsManifest.lib LLVMX86AsmParser.lib LLVMX86CodeGen.lib LLVMX86Desc.lib LLVMX86Disassembler.lib LLVMX86Info.lib LLVMX86TargetMCA.lib LLVMXRay.lib LLVMipo.lib
+          ninja -j $env:NUMBER_OF_PROCESSORS LTO.dll llvm-config
+
+      - name: Installing LLVM C API
+        shell: pwsh
+        run: |
+          cd llvm-project\llvm\build
+          ninja install
+
+      - name: Packaging LLVM C API (LLVM C API Libraries & LLVM Linker Libraries)
+        shell: pwsh
+        run: |
+          cd llvm-project\llvm\build
+          7z a -tzip libraries.zip lib
+        
+      - name: Packaging LLVM C API (Includes)
+        shell: pwsh
+        run: |
+          cd llvm-project\llvm\dist
+          7z a -tzip includes.zip include
+
+      - name: Releasing LLVM C API
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.BUILD_ID }}
+          name: "LLVM C API (Windows)"
+          body: |
+            ## LLVM C API
+           
+            LLVM C API (v17.0.6) libraries for Windows x86_64 environments.
+            
+          files: |
+            llvm-project/llvm/build/bin/llvm-config.exe
+            llvm-project/llvm/build/libraries.zip
+            llvm-project/llvm/dist/includes.zip
+            
+          draft: false
