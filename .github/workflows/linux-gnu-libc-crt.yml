@@ -38,7 +38,7 @@ jobs:
 
       - name: Installing dependencies
         run: |
-          sudo apt-get install -y apt-transport-https build-essential bison flex texinfo gawk python3 libgcc-multilib ninja-build cmake coreutils curl git libzstd-dev software-properties-common clang lld gcc-13 libstdc++-13-dev
+          sudo apt-get install -y apt-transport-https build-essential bison flex texinfo gawk python3 ninja-build cmake coreutils curl git libzstd-dev software-properties-common clang lld gcc-13 libstdc++-13-dev
           
       - name: Preparing for build glibc
         run: |
