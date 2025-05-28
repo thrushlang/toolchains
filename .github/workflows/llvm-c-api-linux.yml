@@ -69,7 +69,7 @@ jobs:
 
       - name: Packaging LLVM C API (LLVM C API Libraries, LLVM Linker Libraries & C Runtime)
         run: |
-          tar --format=pax -cJf libc.tar.xz --exclude='*/*.cmake' --exclude='*/*.d' runtimes
+          tar --format=pax -cJf runtimes.tar.xz --exclude='*/*.cmake' --exclude='*/*.d' runtimes
           tar --format=pax -cJf libraries.tar.xz --exclude='*/*.o' --exclude='*/*.cmake' --exclude='*/*.d' lib
         working-directory: llvm-project/llvm/build
 
@@ -90,7 +90,7 @@ jobs:
             
           files: |
             llvm-project/llvm/build/bin/llvm-config
-            llvm-project/llvm/build/libc.tar.xz
+            llvm-project/llvm/build/runtimes.tar.xz
             llvm-project/llvm/build/libraries.tar.xz
             llvm-project/llvm/dist/includes.tar.xz
             
