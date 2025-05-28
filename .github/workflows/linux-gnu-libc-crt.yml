@@ -49,6 +49,8 @@ jobs:
           
       - name: Configuring Linux glibc
         run: |
+          export CFLAGS="-Wno-attributes -Wno-error=inlining-failed"
+          export CPPFLAGS="-Wno-attributes -Wno-error=inlining-failed"
           ../configure --prefix="/opt/glibc-dist" --disable-werror --with-static-libgcc --disable-multilib  
         working-directory: glibc/build
 
