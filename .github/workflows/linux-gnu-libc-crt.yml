@@ -49,7 +49,7 @@ jobs:
           
       - name: Configuring Linux glibc
         run: |
-          ../configure --prefix="/opt/glibc-dist" --enable-static-nss --disable-shared --enable-static-pie --with-static-libgcc --disable-multilib  
+          ../configure --prefix="/opt/glibc-dist" --with-static-libgcc --disable-multilib  
         working-directory: glibc/build
 
       - name: Building Linux glibc
