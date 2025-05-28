@@ -1,0 +1,85 @@
+name: LLVM-C API (Linux)
+
+on:
+  push:
+    tags:
+      - 'LLVM-C-API-LINUX-v*.*.*'
+
+jobs:
+  build-llvm:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+  
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+  
+    steps:
+      - name: Generating Unique ID
+        run: |
+          BASE_NAME=$(echo "$GITHUB_REF" | sed 's|^refs/tags/||')
+          BUILD_ID="${BASE_NAME}-$GITHUB_RUN_ID" 
+          
+          echo "BUILD_ID=$BUILD_ID" >> $GITHUB_ENV
+          echo "BUILD_ID=$TAG_NAME" >> $GITHUB_ENV
+
+          echo "Unique ID: $BUILD_ID"
+          echo "Base name: $TAG_NAME"
+    
+      - name: Downloading LLVM project
+        run: |
+          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/llvm-project-17.0.6.src.tar.xz
+
+      - name: Unpacking LLVM project 
+        run: |
+          tar -xf llvm-project-17.0.6.src.tar.xz
+          mv llvm-project-17.0.6.src llvm-project
+
+      - name: Installing dependencies
+        run: |
+          sudo apt-get install -y build-essential cmake ninja-build python3 libz-dev binutils xz-utils
+          sudo apt-get remove -y llvm-16* clang-16*
+          sudo rm -rf /usr/lib/llvm-16
+
+      - name: Preparing for build (LLVM-C API)
+        run: |
+          mkdir build
+          mkdir dist
+          cd build
+        working-directory: llvm-project/llvm
+          
+      - name: Configuring CMake (LLVM C standard library & C Runtime)
+        run: |
+          cmake ../CMakeLists.txt -G Ninja -DCMAKE_C_COMPILER="gcc" -DCMAKE_CXX_COMPILER="g++" -DLLVM_ENABLE_RUNTIMES="libc" -DCMAKE_INSTALL_PREFIX="../dist" -DCMAKE_BUILD_TYPE=MinSizeReel -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_BUILD_TESTS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_DOCS=OFF
+        working-directory: llvm-project/llvm/build
+
+      - name: Building LLVM C API
+        run: |
+          ninja -j$(nproc) libc
+        working-directory: llvm-project/llvm/build
+
+      - name: Installing LLVM C API
+        run: |
+          ninja install
+        working-directory: llvm-project/llvm/build
+
+      - name: Packaging LLVM C Standard Library & C Runtime
+        run: |
+          tar --format=pax -cJf runtimes.tar.xz --exclude='*/*.cmake' --exclude='*/*.d' runtimes
+        working-directory: llvm-project/llvm/build
+        
+      - name: Releasing LLVM C Standard Library & C Runtime
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.BUILD_ID }}
+          name: "LLVM C Standard Library & C Runtime (Linux)"
+          body: |
+            ##  LLVM C Standard Library & C Runtime
+           
+            C Standard Library & C Runtime for Linux x86_64.
+            
+          files: |
+            llvm-project/llvm/build/runtimes.tar.xz
+            
+          draft: false
