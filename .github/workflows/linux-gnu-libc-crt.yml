@@ -43,13 +43,13 @@ jobs:
       - name: Preparing for build glibc
         run: |
           mkdir build
-          mkdir dist
           cd build
+          mkdir dist
         working-directory: glibc/
           
       - name: Configuring Linux glibc
         run: |
-          ../configure --prefix="../dist" --enable-static-nss --disable-shared --enable-static-pie --with-static-libgcc 
+          ../configure --prefix="dist" --enable-static-nss --disable-shared --enable-static-pie --with-static-libgcc 
         working-directory: glibc/build
 
       - name: Building Linux glibc
@@ -61,7 +61,7 @@ jobs:
       - name: Packaging Linux glibc
         run: |
           tar --format=pax -cJf glibc.tar.xz --exclude='*/*.cmake' --exclude='*/*.d' lib
-        working-directory: glibc/dist
+        working-directory: glibc/build/dist
         
       - name: Releasing Linux x86_64 glibc
         uses: softprops/action-gh-release@v2
@@ -74,6 +74,6 @@ jobs:
             GNU C Standard Library & GNU C runtime.
             
           files: |
-            glibc/dist/glibc.tar.xz
+            glibc/build/dist/glibc.tar.xz
             
           draft: false
