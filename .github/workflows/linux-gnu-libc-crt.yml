@@ -60,7 +60,7 @@ jobs:
 
       - name: Packaging Linux glibc
         run: |
-          sudo tar --format=pax -cJf glibc.tar.xz --exclude='*/*.cmake' --exclude='*/*.d' lib
+          sudo tar --format=pax -cJf glibc.tar.xz --exclude='*/*.cmake' --exclude='*/*.make' --exclude='*/*.d' lib
         working-directory: /opt/glibc-dist
         
       - name: Releasing Linux x86_64 glibc
