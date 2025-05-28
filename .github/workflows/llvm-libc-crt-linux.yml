@@ -6,7 +6,7 @@ on:
       - 'GNU-LIBC-CRT-LINUX-v*.*.*'
 
 jobs:
-  build-llvm:
+  build-glibc:
     runs-on: ubuntu-latest
 
     permissions:
