@@ -1,9 +1,9 @@
-name: LLVM-C API (Linux)
+name: LLVM C standard library & C Runtime (Linux)
 
 on:
   push:
     tags:
-      - 'LLVM-C-API-LINUX-v*.*.*'
+      - 'LLVM-LIBC-CRT-LINUX-v*.*.*'
 
 jobs:
   build-llvm:
