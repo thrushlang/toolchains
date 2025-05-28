@@ -34,7 +34,7 @@ jobs:
       - name: Unpacking Linux glibc
         run: |
           tar -xf glibc-2.39.tar.gz 
-          mv glibc-glibc-2.39 glibc
+          mv glibc-2.39 glibc
 
       - name: Installing dependencies
         run: |
