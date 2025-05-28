@@ -57,11 +57,6 @@ jobs:
           ninja -j$(nproc) libc
         working-directory: llvm-project/llvm/build
 
-      - name: Installing LLVM C API
-        run: |
-          ninja install
-        working-directory: llvm-project/llvm/build
-
       - name: Packaging LLVM C Standard Library & C Runtime
         run: |
           tar --format=pax -cJf runtimes.tar.xz --exclude='*/*.cmake' --exclude='*/*.d' runtimes
