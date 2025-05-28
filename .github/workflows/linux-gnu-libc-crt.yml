@@ -29,7 +29,7 @@ jobs:
     
       - name: Downloading Linux glibc
         run: |
-          wget https://ftp.gnu.org/gnu/glibc/glibc-2.41.tar.xz
+          wget https://github.com/bminor/glibc/archive/refs/tags/glibc-2.41.tar.gz
 
       - name: Unpacking Linux glibc
         run: |
