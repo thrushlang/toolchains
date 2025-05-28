@@ -33,7 +33,7 @@ jobs:
 
       - name: Unpacking Linux glibc
         run: |
-          tar -xf glibc-2.41.tar.xz
+          tar -xf glibc-2.41.tar.gz 
           mv glibc-2.41 glibc
 
       - name: Installing dependencies
