@@ -38,7 +38,7 @@ jobs:
 
       - name: Installing dependencies
         run: |
-          sudo apt-get install -y apt-transport-https build-essential ninka cmake coreutils curl git libzstd-dev python3 python3-pip software-properties-common clang lld gcc-13 libstdc++-13-dev
+          sudo apt-get install -y apt-transport-https build-essential ninja cmake coreutils curl git libzstd-dev python3 python3-pip software-properties-common clang lld gcc-13 libstdc++-13-dev
           
       - name: Preparing for build (LLVM-C API)
         run: |
