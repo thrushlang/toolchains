@@ -29,12 +29,12 @@ jobs:
     
       - name: Downloading Linux glibc
         run: |
-          wget https://github.com/bminor/glibc/archive/refs/tags/glibc-2.41.tar.gz
+          wget https://mirrors.kernel.org/gnu/glibc/glibc-2.39.tar.xz
 
       - name: Unpacking Linux glibc
         run: |
-          tar -xf glibc-2.41.tar.gz 
-          mv glibc-glibc-2.41 glibc
+          tar -xf glibc-2.39.tar.gz 
+          mv glibc-glibc-2.39 glibc
 
       - name: Installing dependencies
         run: |
