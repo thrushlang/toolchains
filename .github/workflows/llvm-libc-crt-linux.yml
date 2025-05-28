@@ -1,9 +1,9 @@
-name: LLVM C standard library & C Runtime (glibc) (Linux)
+name: GNU C Standard Library & GNU C Runtime.
 
 on:
   push:
     tags:
-      - 'LLVM-LIBC-CRT-LINUX-v*.*.*'
+      - 'GNU-LIBC-CRT-LINUX-v*.*.*'
 
 jobs:
   build-llvm:
@@ -71,7 +71,7 @@ jobs:
           body: |
             ## Linux x86_64 glibc
            
-            GNU C standard library & GNU C runtime.
+            GNU C Standard Library & GNU C runtime.
             
           files: |
             glibc/dist/glibc.tar.xz
