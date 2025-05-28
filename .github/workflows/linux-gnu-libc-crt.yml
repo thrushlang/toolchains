@@ -54,7 +54,7 @@ jobs:
 
       - name: Building Linux glibc
         run: |
-          make -j$(nproc)
+          make -j8
           make install 
         working-directory: glibc/build
 
