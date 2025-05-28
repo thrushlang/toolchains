@@ -1,4 +1,4 @@
-name: LLVM C standard library & C Runtime (Linux)
+name: LLVM C standard library & C Runtime (glibc) (Linux)
 
 on:
   push:
@@ -27,52 +27,53 @@ jobs:
           echo "Unique ID: $BUILD_ID"
           echo "Base name: $TAG_NAME"
     
-      - name: Downloading LLVM project
+      - name: Downloading Linux glibc
         run: |
-          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/llvm-project-17.0.6.src.tar.xz
+          wget https://ftp.gnu.org/gnu/glibc/glibc-2.41.tar.xz
 
-      - name: Unpacking LLVM project 
+      - name: Unpacking Linux glibc
         run: |
-          tar -xf llvm-project-17.0.6.src.tar.xz
-          mv llvm-project-17.0.6.src llvm-project
+          tar -xf glibc-2.41.tar.xz
+          mv glibc-2.41 glibc
 
       - name: Installing dependencies
         run: |
           sudo apt-get install -y apt-transport-https build-essential ninja-build cmake coreutils curl git libzstd-dev software-properties-common clang lld gcc-13 libstdc++-13-dev
           
-      - name: Preparing for build (LLVM-C API)
+      - name: Preparing for build glibc
         run: |
           mkdir build
           mkdir dist
           cd build
-        working-directory: llvm-project/llvm
+        working-directory: glibc/
           
-      - name: Configuring CMake (LLVM C standard library & C Runtime)
+      - name: Configuring Linux glibc
         run: |
-          cmake ../CMakeLists.txt -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DLLVM_ENABLE_RUNTIMES="libc" -DLLVM_ENABLE_PROJECTS="libc" -DLIBC_CMAKE_USE_LLVM_FLAGS=ON -DLLVM_LIBC_FULL_BUILD=ON -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_INSTALL_PREFIX="../dist" -DCMAKE_BUILD_TYPE=MinSizeReel -DLLVM_ENABLE_TERMINFO=OFF -DLLVM_ENABLE_ZLIB=OFF -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE -DLLVM_ENABLE_LIBXML2=0 -DLLVM_BUILD_TESTS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_DOCS=OFF
-        working-directory: llvm-project/llvm/build
+          ../configure --prefix="../dist" --enable-static-nss --disable-shared --enable-static-pie --with-static-libgcc 
+        working-directory: glibc/build
 
-      - name: Building LLVM C API
+      - name: Building Linux glibc
         run: |
-          ninja -j$(nproc) libc
-        working-directory: llvm-project/llvm/build
+          make -j$(nproc)
+          make install 
+        working-directory: glibc/build
 
-      - name: Packaging LLVM C Standard Library & C Runtime
+      - name: Packaging Linux glibc
         run: |
-          tar --format=pax -cJf runtimes.tar.xz --exclude='*/*.cmake' --exclude='*/*.d' runtimes
-        working-directory: llvm-project/llvm/build
+          tar --format=pax -cJf glibc.tar.xz --exclude='*/*.cmake' --exclude='*/*.d' lib
+        working-directory: glibc/dist
         
-      - name: Releasing LLVM C Standard Library & C Runtime
+      - name: Releasing Linux x86_64 glibc
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.BUILD_ID }}
-          name: "LLVM C Standard Library & C Runtime (Linux)"
+          name: "Linux x86_64 glibc"
           body: |
-            ##  LLVM C Standard Library & C Runtime
+            ## Linux x86_64 glibc
            
-            C Standard Library & C Runtime for Linux x86_64.
+            GNU C standard library & GNU C runtime.
             
           files: |
-            llvm-project/llvm/build/runtimes.tar.xz
+            glibc/dist/glibc.tar.xz
             
           draft: false
