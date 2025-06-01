@@ -1,11 +1,14 @@
 name: Clang (Linux)
+
 on:
   push:
     tags:
       - 'CLANG-LINUX-v*.*.*'
+
 jobs:
   build-clang:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+
     permissions:
       contents: write
   
@@ -17,137 +20,66 @@ jobs:
         run: |
           BASE_NAME=$(echo "$GITHUB_REF" | sed 's|^refs/tags/||')
           BUILD_ID="${BASE_NAME}-$GITHUB_RUN_ID" 
-          TAG_NAME=$(echo "$GITHUB_REF" | sed 's|^refs/tags/||')
           
           echo "BUILD_ID=$BUILD_ID" >> $GITHUB_ENV
-          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+          echo "BUILD_ID=$TAG_NAME" >> $GITHUB_ENV
+
           echo "Unique ID: $BUILD_ID"
           echo "Base name: $TAG_NAME"
     
       - name: Downloading LLVM project
         run: |
           wget https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/llvm-project-17.0.6.src.tar.xz
-          
+
       - name: Unpacking LLVM project 
         run: |
           tar -xf llvm-project-17.0.6.src.tar.xz
           mv llvm-project-17.0.6.src llvm-project
-          
+
       - name: Installing dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential cmake ninja-build python3 libz-dev binutils xz-utils upx-ucl
-          sudo apt-get remove -y llvm-16* clang-16* 
-          sudo rm -rf /usr/lib/llvm-16 
-          
-      - name: Preparing build directories
+          sudo apt-get install -y build-essential cmake ninja-build python3 libz-dev binutils xz-utils
+          sudo apt-get remove -y llvm-16* clang-16*
+          sudo rm -rf /usr/lib/llvm-16
+
+      - name: Configuring CMake (Clang)
         run: |
-          mkdir -p llvm-project/llvm/build
-          mkdir -p llvm-project/llvm/dist
-          
-      - name: Configuring CMake (Static Minimal Clang)
+          mkdir build
+          mkdir dist
+          cd build
+        working-directory: llvm-project/clang
+
+      - name: Configuring CMake (Clang)
         run: |
-          cmake ../CMakeLists.txt \
-            -G Ninja \
-            -DCMAKE_C_COMPILER="gcc" \
-            -DCMAKE_CXX_COMPILER="g++" \
-            -DCMAKE_BUILD_TYPE=MinSizeRel \
-            -DCMAKE_INSTALL_PREFIX="../dist" \
-            -DLLVM_ENABLE_PROJECTS="clang;lld" \
-            -DLLVM_BUILD_LLVM_DYLIB=OFF \
-            -DLLVM_LINK_LLVM_DYLIB=OFF \
-            -DCLANG_LINK_CLANG_DYLIB=OFF \
-            -DLLVM_BUILD_SHARED_LIBS=OFF \
-            -DBUILD_SHARED_LIBS=OFF \
-            -DLLVM_OPTIMIZED_TABLEGEN=ON \
-            -DLLVM_USE_SPLIT_DWARF=ON \
-            -DCMAKE_C_FLAGS="-Os -ffunction-sections -fdata-sections" \
-            -DCMAKE_CXX_FLAGS="-Os -ffunction-sections -fdata-sections" \
-            -DCMAKE_EXE_LINKER_FLAGS="-static-libgcc -static-libstdc++ -Wl,--gc-sections -Wl,--strip-all" \
-            -DLLVM_BUILD_RUNTIME=OFF \
-            -DLLVM_ENABLE_TERMINFO=OFF \
-            -DLLVM_ENABLE_ZLIB=OFF \
-            -DLLVM_ENABLE_ZSTD=OFF \
-            -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE \
-            -DLLVM_ENABLE_LIBXML2=OFF \
-            -DLLVM_ENABLE_LIBPFM=OFF \
-            -DLLVM_ENABLE_LIBEDIT=OFF \
-            -DLLVM_ENABLE_Z3_SOLVER=OFF \
-            -DLLVM_ENABLE_RTTI=OFF \
-            -DLLVM_ENABLE_EH=OFF \
-            -DLLVM_ENABLE_UNWIND_TABLES=OFF \
-            -DLLVM_INCLUDE_UTILS=OFF \
-            -DLLVM_INCLUDE_TOOLS=OFF \
-            -DLLVM_BUILD_TOOLS=OFF \
-            -DLLVM_INCLUDE_EXAMPLES=OFF \
-            -DLLVM_BUILD_EXAMPLES=OFF \
-            -DLLVM_INCLUDE_TESTS=OFF \
-            -DLLVM_BUILD_TESTS=OFF \
-            -DLLVM_INCLUDE_DOCS=OFF \
-            -DLLVM_ENABLE_DOXYGEN=OFF \
-            -DLLVM_ENABLE_SPHINX=OFF \
-            -DLLVM_TARGETS_TO_BUILD="X86" \
-            -DCLANG_ENABLE_STATIC_ANALYZER=OFF \
-            -DCLANG_ENABLE_ARCMT=OFF \
-            -DCLANG_BUILD_EXAMPLES=OFF \
-            -DCLANG_INCLUDE_TESTS=OFF \
-            -DCLANG_INCLUDE_DOCS=OFF
-        working-directory: llvm-project/llvm/build
-        
-      - name: Building minimal Clang and LLD
+              cmake ../CMakeLists.txt -G Ninja -DCMAKE_C_COMPILER="gcc" -DCMAKE_C_FLAGS="-Os -ffunction-sections -fdata-sections" -DCMAKE_CXX_FLAGS="-Os -ffunction-sections -fdata-sections" -DCMAKE_EXE_LINKER_FLAGS="-static-libgcc -static-libstdc++ -Wl,--gc-sections -Wl,--strip-all" -DCMAKE_CXX_COMPILER="g++" -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_ENABLE_TERMINFO=OFF -DLLVM_ENABLE_ZLIB=OFF -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE -DLLVM_ENABLE_LIBXML2=0 -DLLVM_INCLUDE_UTILS=OFF -DCMAKE_INSTALL_PREFIX="../dist" -DCMAKE_BUILD_TYPE=MinSizeReel -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_BUILD_TESTS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_DOCS=OFF
+        working-directory: llvm-project/clang/build
+
+      - name: Building Clang
         run: |
-          ninja clang-17 lld
-        working-directory: llvm-project/llvm/build
-        
-      - name: Optimizing binaries
+          ninja -j$(nproc) clang
+        working-directory: llvm-project/clang/build
+
+      - name: Optimizing Clang
         run: |
-          strip --strip-all bin/clang-17 || true
-          strip --strip-all bin/lld || true
-          strip --strip-all bin/ld.lld || true
-          
-          echo "=== Binary sizes after optimization ==="
-          ls -lh bin/clang-17 bin/lld bin/ld.lld || true
-        working-directory: llvm-project/llvm/build
-        
-      - name: Creating minimal runtime
+          strip --strip-all bin/clang
+        working-directory: llvm-project/clang/build
+
+      - name: Packaging Clang
         run: |
-          mkdir -p clang-minimal/{bin,lib}
-          
-          # Copy available binaries
-          cp bin/clang-17 clang-minimal/bin/ || true
-          cp bin/lld clang-minimal/bin/ || true  
-          cp bin/ld.lld clang-minimal/bin/ || true
-          
-          # Create symlinks
-          cd clang-minimal/bin
-          ln -sf clang-17 clang || true
-          ln -sf clang-17 clang++ || true
-          ln -sf clang-17 cc || true
-          ln -sf ld.lld ld || true
-          cd ../..
-          
-          echo "=== Final structure ==="
-          find clang-minimal -type f -exec ls -lh {} \;
-        working-directory: llvm-project/llvm/build
-        
-      - name: Packaging minimal Clang
-        run: |
-          tar --format=posix -cJf clang.tar.xz clang-minimal/
-          echo "=== Package size ==="
-          ls -lh clang.tar.xz
-        working-directory: llvm-project/llvm/build
-        
-      - name: Releasing Minimal Static Clang x86_64 (Linux)
+          tar --format=pax -cJf clang.tar.xz clang-17
+        working-directory: llvm-project/clang/build/bin
+
+      - name: Releasing Clang (Linux)
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.BUILD_ID }}
           name: "Clang x86_64 (Linux)"
           body: |
-            ## Clang
+            ## LLVM C API
            
-            Minimal, statically-linked Clang build optimized for linking only.
+            Clang for Linux x86_64 environments.
             
           files: |
-            llvm-project/llvm/build/clang.tar.xz
+            llvm-project/clang/build/bin/clang.tar.xz
             
           draft: false
