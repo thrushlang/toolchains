@@ -59,6 +59,11 @@ jobs:
           ninja -j$(nproc) clang
         working-directory: llvm-project/clang/build
 
+      - name: Optimizing Clang
+        run: |
+          strip bin/clang
+        working-directory: llvm-project/clang/build
+
       - name: Preparing for build (LLVM-C API)
         run: |
           mkdir build
