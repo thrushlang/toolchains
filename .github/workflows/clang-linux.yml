@@ -105,9 +105,6 @@ jobs:
             -DCLANG_BUILD_EXAMPLES=OFF \
             -DCLANG_INCLUDE_TESTS=OFF \
             -DCLANG_INCLUDE_DOCS=OFF \
-            \
-            `# LLD para linking` \
-            -DLLVM_ENABLE_LLD=ON
         working-directory: llvm-project/build
         
       - name: Building minimal Clang and LLD
