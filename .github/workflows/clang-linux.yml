@@ -94,15 +94,8 @@ jobs:
             -DCLANG_INCLUDE_DOCS=OFF
         working-directory: llvm-project/llvm/build
         
-      - name: List available targets
-        run: |
-          echo "=== Available ninja targets ==="
-          ninja -t targets | grep -E "(clang|lld)" |
-        working-directory: llvm-project/llvm/build
-        
       - name: Building minimal Clang and LLD
         run: |
-          # Build the correct targets
           ninja clang-17 lld
         working-directory: llvm-project/llvm/build
         
