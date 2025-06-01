@@ -98,7 +98,6 @@ jobs:
             "optimizations": [
               "size_optimized",
               "stripped",
-              "upx_compressed",
               "lto_enabled"
             ],
             "file": "clang-linux-x86_64.tar.xz"
@@ -117,7 +116,6 @@ jobs:
             "optimizations": [
               "size_optimized",
               "stripped",
-              "upx_compressed",
               "lto_enabled"
             ],
             "file": "lld-linux-x86_64.tar.xz"
