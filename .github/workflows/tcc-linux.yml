@@ -1,0 +1,123 @@
+name: TCC (Linux)
+on:
+  push:
+    tags:
+      - 'TCC-LINUX-v*.*.*'
+jobs:
+  build-tcc:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+  
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+  
+    steps:
+      - name: Generating Unique ID
+        run: |
+          BASE_NAME=$(echo "$GITHUB_REF" | sed 's|^refs/tags/||')
+          BUILD_ID="${BASE_NAME}-$GITHUB_RUN_ID" 
+          TAG_NAME=$(echo "$GITHUB_REF" | sed 's|^refs/tags/TCC-LINUX-v||')
+          
+          echo "BUILD_ID=$BUILD_ID" >> $GITHUB_ENV
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+          echo "Unique ID: $BUILD_ID"
+          echo "Tag version: $TAG_NAME"
+    
+      - name: Downloading TCC source
+        run: |
+          wget https://download.savannah.gnu.org/releases/tinycc/tcc-0.9.27.tar.bz2
+          
+      - name: Unpacking TCC
+        run: |
+          tar -xf tcc-0.9.27.tar.bz2
+          mv tcc-0.9.27 tcc
+          
+      - name: Installing dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential upx-ucl binutils xz-utils
+          
+      - name: Configuring TCC build
+        run: |
+          cd tcc
+          ./configure \
+            --prefix=/usr/local/tcc \
+            --enable-static \
+            --disable-shared \
+            --config-musl \
+            --strip-binaries \
+            --cc=gcc \
+            --extra-cflags="-Os -ffunction-sections -fdata-sections" \
+            --extra-ldflags="-Wl,--gc-sections -Wl,-s -static"
+        working-directory: .
+        
+      - name: Building TCC
+        run: |
+          make -j$(nproc) CFLAGS="-Os -ffunction-sections -fdata-sections"
+        working-directory: tcc
+        
+      - name: Optimizing TCC binary
+        run: |
+          strip --strip-all tcc
+          upx --best --lzma tcc || true
+        working-directory: tcc
+        
+      - name: Creating manifest
+        run: |
+          cat > tcc-manifest.json << EOF
+          {
+            "name": "tcc",
+            "version": "${{ env.TAG_NAME }}",
+            "tcc_version": "0.9.27",
+            "architecture": "x86_64",
+            "platform": "linux",
+            "build_date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "build_id": "${{ env.BUILD_ID }}",
+            "language": "c",
+            "type": "standalone_binary",
+            "features": {
+              "static_build": true,
+              "musl_config": true,
+              "runtime_compilation": true,
+              "jit_execution": true
+            },
+            "optimizations": [
+              "size_optimized",
+              "stripped",
+              "static_linked",
+              "upx_compressed"
+            ],
+            "file": "tcc-linux-x86_64.tar.xz",
+            "note": "Tiny C Compiler - supports runtime compilation and JIT execution"
+          }
+          EOF
+        working-directory: tcc
+        
+      - name: Packaging TCC
+        run: |
+          mkdir tcc-standalone
+          cp tcc/tcc tcc-standalone/
+          
+          if [ -f "tcc/libtcc1.a" ]; then
+            cp tcc/libtcc1.a tcc-standalone/
+          fi
+          
+          tar --format=pax -cJf tcc-linux-x86_64.tar.xz tcc-standalone/
+        working-directory: .
+        
+      - name: Releasing TCC (Linux)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.BUILD_ID }}
+          name: "TCC x86_64 (Linux)"
+          body: |
+            ## TCC (Tiny C Compiler) x86_64
+           
+            Ultra-fast C compiler with JIT execution capabilities for Linux x86_64.
+            
+          files: |
+            tcc-linux-x86_64.tar.xz
+            tcc/tcc-manifest.json
+            
+          draft: false
