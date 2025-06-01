@@ -39,33 +39,35 @@ jobs:
       - name: Installing dependencies
         run: |
           sudo apt-get install -y build-essential cmake ninja-build python3 libz-dev binutils xz-utils
+          sudo apt-get remove -y llvm-16* clang-16*
+          sudo rm -rf /usr/lib/llvm-16
 
       - name: Configuring CMake (Clang)
         run: |
           mkdir build
           mkdir dist
           cd build
-        working-directory: llvm-project/clang
+        working-directory: llvm-project/llvm
 
       - name: Configuring CMake (Clang)
         run: |
               cmake ../CMakeLists.txt -G Ninja -DCMAKE_C_COMPILER="gcc" -DCMAKE_C_FLAGS="-Os -ffunction-sections -fdata-sections" -DCMAKE_CXX_FLAGS="-Os -ffunction-sections -fdata-sections" -DCMAKE_EXE_LINKER_FLAGS="-static-libgcc -static-libstdc++ -Wl,--gc-sections -Wl,--strip-all" -DCMAKE_CXX_COMPILER="g++" -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_ENABLE_TERMINFO=OFF -DLLVM_ENABLE_ZLIB=OFF -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE -DLLVM_ENABLE_LIBXML2=0 -DLLVM_INCLUDE_UTILS=OFF -DCMAKE_INSTALL_PREFIX="../dist" -DCMAKE_BUILD_TYPE=MinSizeReel -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_BUILD_TESTS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_DOCS=OFF
-        working-directory: llvm-project/clang/build
+        working-directory: llvm-project/llvm/build
 
       - name: Building Clang
         run: |
           ninja -j$(nproc) clang
-        working-directory: llvm-project/clang/build
+        working-directory: llvm-project/llvm/build
 
       - name: Optimizing Clang
         run: |
           strip --strip-all bin/clang
-        working-directory: llvm-project/clang/build
+        working-directory: llvm-project/llvm/build
 
       - name: Packaging Clang
         run: |
           tar --format=pax -cJf clang.tar.xz clang-17
-        working-directory: llvm-project/clang/build/bin
+        working-directory: llvm-project/llvm/build/bin
 
       - name: Releasing Clang (Linux)
         uses: softprops/action-gh-release@v2
@@ -78,6 +80,6 @@ jobs:
             Clang for Linux x86_64 environments.
             
           files: |
-            llvm-project/clang/build/bin/clang.tar.xz
+            llvm-project/llvm/build/bin/clang.tar.xz
             
           draft: false
