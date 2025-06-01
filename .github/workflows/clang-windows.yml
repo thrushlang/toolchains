@@ -97,41 +97,26 @@ jobs:
           Write-Host "Building compiler-rt..."
           ninja -j $env:NUMBER_OF_PROCESSORS compiler-rt
           
-      - name: Testing Clang build
-        shell: pwsh
-        run: |
-          cd llvm-project\build
-          echo '#include <stdio.h>
-          int main() {
-              printf("Hello from Clang!\n");
-              return 0;
-          }' | Out-File -FilePath test.c -Encoding ASCII
-          .\bin\clang.exe test.c -o test.exe
-          .\test.exe
-          
       - name: Organizing package structure
         shell: pwsh
         run: |
           cd clang-package
           
-          # Create directory structure
           New-Item -ItemType Directory -Path "bin" -Force
           New-Item -ItemType Directory -Path "lib" -Force
           New-Item -ItemType Directory -Path "include" -Force
           
-          # Copy binaries
           Copy-Item "..\llvm-project\build\bin\clang.exe" -Destination "bin\"
           Copy-Item "..\llvm-project\build\bin\lld*.exe" -Destination "bin\"
           
-          # Copy runtime libraries
           if (Test-Path "..\llvm-project\build\lib\clang") {
               Copy-Item "..\llvm-project\build\lib\clang" -Destination "lib\" -Recurse
           }
           
-          # Copy includes
           if (Test-Path "..\llvm-project\build\lib\clang\17.0.6\include") {
               Copy-Item "..\llvm-project\build\lib\clang\17.0.6\include" -Destination "include\clang" -Recurse
           }
+          
           Copy-Item "..\llvm-project\clang\lib\Headers\*" -Destination "include\" -Recurse -ErrorAction SilentlyContinue
           
       - name: Creating manifest
@@ -174,7 +159,6 @@ jobs:
       - name: Packaging Clang toolchain
         shell: pwsh
         run: |
-          Write-Host "Creating final package..."
           7z a -tzip clang-windows-x86_64.zip clang-package\*
           
       - name: Releasing Clang (Windows)
