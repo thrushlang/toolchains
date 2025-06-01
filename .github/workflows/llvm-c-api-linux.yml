@@ -42,13 +42,30 @@ jobs:
           sudo apt-get remove -y llvm-16* clang-16*
           sudo rm -rf /usr/lib/llvm-16
 
+      - name: Configuring CMake (Clang)
+        run: |
+          mkdir build
+          mkdir dist
+          cd build
+        working-directory: llvm-project/clang
+
+      - name: Configuring CMake (Clang)
+        run: |
+          cmake ../CMakeLists.txt -G Ninja -DCMAKE_C_COMPILER="gcc" -DCMAKE_CXX_COMPILER="g++" -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_ENABLE_TERMINFO=OFF -DLLVM_ENABLE_ZLIB=OFF -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE -DLLVM_ENABLE_LIBXML2=0 -DLLVM_ENABLE_LIBPFM=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_Z3_SOLVER=OFF -DLLVM_ENABLE_RTTI=OFF -DLLVM_INCLUDE_UTILS=OFF -DCMAKE_INSTALL_PREFIX="../dist" -DCMAKE_BUILD_TYPE=MinSizeReel -DLLVM_BUILD_TESTS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_DOCS=OFF
+        working-directory: llvm-project/clang/build
+
+      - name: Building Clang
+        run: |
+          ninja -j$(nproc) clang
+        working-directory: llvm-project/clang/build
+
       - name: Preparing for build (LLVM-C API)
         run: |
           mkdir build
           mkdir dist
           cd build
         working-directory: llvm-project/llvm
-          
+
       - name: Configuring CMake (LLVM C API)
         run: |
           cmake ../CMakeLists.txt -G Ninja -DCMAKE_C_COMPILER="gcc" -DCMAKE_CXX_COMPILER="g++" -DLLVM_ENABLE_PROJECTS="llvm;lld" -DLLVM_ENABLE_TERMINFO=OFF -DLLVM_ENABLE_ZLIB=OFF -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE -DLLVM_ENABLE_LIBXML2=0 -DLLVM_INCLUDE_UTILS=OFF -DCMAKE_INSTALL_PREFIX="../dist" -DCMAKE_BUILD_TYPE=MinSizeReel -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_BUILD_TESTS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_DOCS=OFF
@@ -56,7 +73,6 @@ jobs:
 
       - name: Building LLVM C API
         run: |
-          ninja -j$(nproc) libc
           ninja -j$(nproc) liblldCOFF.a liblldCommon.a liblldELF.a liblldMachO.a liblldMinGW.a liblldWasm.a
           ninja -j$(nproc) libLLVMAggressiveInstCombine.a libLLVMAnalysis.a libLLVMAsmParser.a libLLVMAsmPrinter.a libLLVMBinaryFormat.a libLLVMBitReader.a libLLVMBitWriter.a libLLVMBitstreamReader.a libLLVMCFGuard.a libLLVMCFIVerify.a libLLVMCodeGen.a libLLVMCodeGenTypes.a libLLVMCore.a libLLVMCoroutines.a libLLVMCoverage.a libLLVMDWARFLinker.a libLLVMDWARFLinkerParallel.a libLLVMDWP.a libLLVMDebugInfoBTF.a libLLVMDebugInfoCodeView.a libLLVMDebugInfoDWARF.a libLLVMDebugInfoGSYM.a libLLVMDebugInfoLogicalView.a libLLVMDebugInfoMSF.a libLLVMDebugInfoPDB.a libLLVMDebuginfod.a libLLVMDemangle.a libLLVMDiff.a libLLVMDlltoolDriver.a libLLVMExecutionEngine.a libLLVMExegesis.a libLLVMExegesisX86.a libLLVMExtensions.a libLLVMFileCheck.a libLLVMFrontendHLSL.a libLLVMFrontendOpenACC.a libLLVMFrontendOpenMP.a libLLVMFuzzMutate.a libLLVMFuzzerCLI.a libLLVMGlobalISel.a libLLVMIRPrinter.a libLLVMIRReader.a libLLVMInstCombine.a libLLVMInstrumentation.a libLLVMInterfaceStub.a libLLVMInterpreter.a libLLVMJITLink.a libLLVMLTO.a libLLVMLibDriver.a libLLVMLineEditor.a libLLVMLinker.a libLLVMMC.a libLLVMMCA.a libLLVMMCDisassembler.a libLLVMMCJIT.a libLLVMMCParser.a libLLVMMIRParser.a libLLVMObjCARCOpts.a libLLVMObjCopy.a libLLVMObject.a libLLVMObjectYAML.a libLLVMOption.a libLLVMOrcJIT.a libLLVMOrcShared.a libLLVMOrcTargetProcess.a libLLVMPasses.a libLLVMProfileData.a libLLVMRemarks.a libLLVMRuntimeDyld.a libLLVMScalarOpts.a libLLVMSelectionDAG.a libLLVMSupport.a libLLVMSymbolize.a libLLVMTableGen.a libLLVMTableGenCommon.a libLLVMTableGenGlobalISel.a libLLVMTarget.a libLLVMTargetParser.a libLLVMTextAPI.a libLLVMTransformUtils.a libLLVMVectorize.a libLLVMWindowsDriver.a libLLVMWindowsManifest.a libLLVMX86AsmParser.a libLLVMX86CodeGen.a libLLVMX86Desc.a libLLVMX86Disassembler.a libLLVMX86Info.a libLLVMX86TargetMCA.a libLLVMXRay.a libLLVMipo.a libLTO.so
           ninja -j$(nproc) llvm-config
@@ -67,11 +83,16 @@ jobs:
           ninja install
         working-directory: llvm-project/llvm/build
 
-      - name: Packaging LLVM C API (LLVM C API Libraries, LLVM Linker Libraries & C Runtime)
+      - name: Packaging LLVM C API (LLVM C API Libraries, LLVM Linker Libraries)
         run: |
           tar --format=pax -cJf runtimes.tar.xz --exclude='*/*.cmake' --exclude='*/*.d' runtimes
           tar --format=pax -cJf libraries.tar.xz --exclude='*/*.o' --exclude='*/*.cmake' --exclude='*/*.d' lib
         working-directory: llvm-project/llvm/build
+
+      - name: Packaging Clang
+        run: |
+          tar --format=pax -cJf clang.tar.xz clang
+        working-directory: llvm-project/clang/build/bin
 
       - name: Packaging LLVM C API (Includes)
         run: |
@@ -89,6 +110,7 @@ jobs:
             LLVM C API (v17.0.6) libraries for Linux x86_64 environments.
             
           files: |
+            llvm-project/clang/build/bin/clang.tar.xz
             llvm-project/llvm/build/bin/llvm-config
             llvm-project/llvm/build/runtimes.tar.xz
             llvm-project/llvm/build/libraries.tar.xz
