@@ -1,14 +1,11 @@
 name: Clang (Linux)
-
 on:
   push:
     tags:
       - 'CLANG-LINUX-v*.*.*'
-
 jobs:
   build-clang:
     runs-on: ubuntu-22.04
-
     permissions:
       contents: write
   
@@ -20,69 +17,132 @@ jobs:
         run: |
           BASE_NAME=$(echo "$GITHUB_REF" | sed 's|^refs/tags/||')
           BUILD_ID="${BASE_NAME}-$GITHUB_RUN_ID" 
+          TAG_NAME=$(echo "$GITHUB_REF" | sed 's|^refs/tags/CLANG-LINUX-v||')
           
           echo "BUILD_ID=$BUILD_ID" >> $GITHUB_ENV
-          echo "BUILD_ID=$TAG_NAME" >> $GITHUB_ENV
-
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
           echo "Unique ID: $BUILD_ID"
-          echo "Base name: $TAG_NAME"
+          echo "Tag version: $TAG_NAME"
     
       - name: Downloading LLVM project
         run: |
           wget https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/llvm-project-17.0.6.src.tar.xz
-
       - name: Unpacking LLVM project 
         run: |
           tar -xf llvm-project-17.0.6.src.tar.xz
           mv llvm-project-17.0.6.src llvm-project
-
       - name: Installing dependencies
         run: |
-          sudo apt-get install -y build-essential cmake ninja-build python3 libz-dev binutils xz-utils
-          sudo apt-get remove -y llvm-16* clang-16*
-          sudo rm -rf /usr/lib/llvm-16
-
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake ninja-build python3 libz-dev binutils xz-utils upx-ucl
       - name: Configuring CMake (Clang)
         run: |
           mkdir build
           mkdir dist
           cd build
         working-directory: llvm-project/llvm
-
       - name: Configuring CMake (Clang)
         run: |
-              cmake ../CMakeLists.txt -G Ninja -DLLVM_ENABLE_DOXYGEN=OFF -DCLANG_ENABLE_STATIC_ANALYZER=OFF -DCMAKE_C_COMPILER="gcc" -DCMAKE_C_FLAGS="-Os -ffunction-sections -fdata-sections" -DCMAKE_CXX_FLAGS="-Os -ffunction-sections -fdata-sections" -DCMAKE_EXE_LINKER_FLAGS="-static-libgcc -static-libstdc++ -Wl,--gc-sections -Wl,--strip-all" -DCMAKE_CXX_COMPILER="g++" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_ENABLE_TERMINFO=OFF -DLLVM_ENABLE_ZLIB=OFF -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE -DLLVM_ENABLE_LIBXML2=0 -DLLVM_INCLUDE_UTILS=OFF -DCMAKE_INSTALL_PREFIX="../dist" -DCMAKE_BUILD_TYPE=MinSizeReel -DLLVM_TARGETS_TO_BUILD="" -DLLVM_BUILD_TESTS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_DOCS=OFF
+              cmake ../CMakeLists.txt -G Ninja \
+                -DLLVM_ENABLE_DOXYGEN=OFF \
+                -DCLANG_ENABLE_STATIC_ANALYZER=OFF \
+                -DCMAKE_C_COMPILER="clang" \
+                -DCMAKE_C_FLAGS="-Oz -ffunction-sections -fdata-sections -fno-unwind-tables -fno-asynchronous-unwind-tables" \
+                -DCMAKE_CXX_FLAGS="-Oz -ffunction-sections -fdata-sections -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-rtti" \
+                -DCMAKE_EXE_LINKER_FLAGS="-static-libgcc -static-libstdc++ -Wl,--gc-sections -Wl,--strip-all -s" \
+                -DCMAKE_CXX_COMPILER="clang++ \
+                -DLLVM_ENABLE_PROJECTS="clang;lld" \
+                -DLLVM_ENABLE_TERMINFO=OFF \
+                -DLLVM_ENABLE_ZLIB=OFF \
+                -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE \
+                -DLLVM_ENABLE_LIBXML2=OFF \
+                -DLLVM_INCLUDE_UTILS=OFF \
+                -DCMAKE_INSTALL_PREFIX="../dist" \
+                -DCMAKE_BUILD_TYPE=MinSizeRel \
+                -DLLVM_TARGETS_TO_BUILD="X86" \
+                -DLLVM_BUILD_TESTS=OFF \
+                -DLLVM_BUILD_EXAMPLES=OFF \
+                -DLLVM_INCLUDE_TESTS=OFF \
+                -DLLVM_INCLUDE_EXAMPLES=OFF \
+                -DLLVM_INCLUDE_DOCS=OFF \
+                -DLLVM_ENABLE_ASSERTIONS=OFF \
+                -DLLVM_ENABLE_EXPENSIVE_CHECKS=OFF \
+                -DLLVM_ENABLE_DEBUG_RUNTIME=OFF \
+                -DLLVM_OPTIMIZED_TABLEGEN=ON \
+                -DLLVM_USE_SPLIT_DWARF=OFF \
+                -DLLVM_ENABLE_LTO=Thin \
+                -DCLANG_ENABLE_ARCMT=OFF \
+                -DCLANG_TOOL_SCAN_BUILD_BUILD=OFF \
+                -DCLANG_TOOL_SCAN_VIEW_BUILD=OFF
         working-directory: llvm-project/llvm/build
-
       - name: Building Clang
         run: |
           ninja -j$(nproc) clang lld
         working-directory: llvm-project/llvm/build
-
       - name: Optimizing Clang
         run: |
           strip --strip-all bin/clang-17
           strip --strip-all bin/ld.lld
         working-directory: llvm-project/llvm/build
-
+      - name: Creating manifests
+        run: |
+          cat > clang-manifest.json << EOF
+          {
+            "name": "clang",
+            "version": "${{ env.TAG_NAME }}",
+            "llvm_version": "17.0.6",
+            "architecture": "x86_64",
+            "platform": "linux",
+            "build_date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "build_id": "${{ env.BUILD_ID }}",
+            "optimizations": [
+              "size_optimized",
+              "stripped",
+              "upx_compressed",
+              "lto_enabled"
+            ],
+            "file": "clang-linux-x86_64.tar.xz"
+          }
+          EOF
+          
+          cat > lld-manifest.json << EOF
+          {
+            "name": "lld",
+            "version": "${{ env.TAG_NAME }}",
+            "llvm_version": "17.0.6",
+            "architecture": "x86_64",
+            "platform": "linux",
+            "build_date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "build_id": "${{ env.BUILD_ID }}",
+            "optimizations": [
+              "size_optimized",
+              "stripped",
+              "upx_compressed",
+              "lto_enabled"
+            ],
+            "file": "lld-linux-x86_64.tar.xz"
+          }
+          EOF
+        working-directory: llvm-project/llvm/build/bin
       - name: Packaging Clang & LLD
         run: |
-          tar --format=pax -cJf clang.tar.xz clang-17
-          tar --format=pax -cJf ld.lld.tar.xz ld.lld
+          tar --format=pax -cJf clang-linux-x86_64.tar.xz clang-17
+          tar --format=pax -cJf lld-linux-x86_64.tar.xz ld.lld
         working-directory: llvm-project/llvm/build/bin
-
       - name: Releasing Clang (Linux)
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.BUILD_ID }}
           name: "Clang x86_64 (Linux)"
           body: |
-            ## LLVM C API
+            ## Clang x86_64 - Optimized Build
            
-            Clang for Linux x86_64 environments.
+            Clang and LLD for Linux x86_64 environments.
             
           files: |
-            llvm-project/llvm/build/bin/clang.tar.xz
-            llvm-project/llvm/build/bin/ld.lld.tar.xz
+            llvm-project/llvm/build/bin/clang-linux-x86_64.tar.xz
+            llvm-project/llvm/build/bin/lld-linux-x86_64.tar.xz
+            llvm-project/llvm/build/bin/clang-manifest.json
+            llvm-project/llvm/build/bin/lld-manifest.json
             
           draft: false
