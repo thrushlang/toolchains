@@ -59,7 +59,6 @@ jobs:
             -DCLANG_LINK_CLANG_DYLIB=OFF \
             -DLLVM_BUILD_SHARED_LIBS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
-            -DCLANG_BUILD_TOOLS=ON \
             \
             -DLLVM_OPTIMIZED_TABLEGEN=ON \
             -DLLVM_USE_SPLIT_DWARF=ON \
@@ -69,7 +68,6 @@ jobs:
             \
             `# Deshabilitar características innecesarias` \
             -DLLVM_BUILD_RUNTIME=OFF \
-            -DLLVM_BUILD_RUNTIMES=OFF \
             -DLLVM_ENABLE_TERMINFO=OFF \
             -DLLVM_ENABLE_ZLIB=OFF \
             -DLLVM_ENABLE_ZSTD=OFF \
@@ -107,7 +105,7 @@ jobs:
         
       - name: Building minimal Clang and LLD
         run: |
-          ninja -j$(nproc)
+          ninja clang lld
         working-directory: llvm-project/llvm/build
         
       - name: Optimizing binaries
