@@ -1,11 +1,14 @@
 name: Clang (Windows)
+
 on:
   push:
     tags:
       - 'CLANG-WINDOWS-v*.*.*'
+
 jobs:
   build-clang:
     runs-on: windows-2022
+
     permissions:
       contents: write
   
@@ -22,157 +25,227 @@ jobs:
           
           echo "BUILD_ID=$BUILD_ID" | Out-File -FilePath $env:GITHUB_ENV -Append
           echo "TAG_NAME=$TAG_NAME" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "BASE_NAME=$BASE_NAME" | Out-File -FilePath $env:GITHUB_ENV -Append
+
           echo "Unique ID: $BUILD_ID"
           echo "Tag version: $TAG_NAME"
+          echo "Base name: $BASE_NAME"
     
       - name: Set up build environment
         uses: ilammy/msvc-dev-cmd@v1
-        
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
-          
-      - name: Install build tools
+          python-version: '3.10'
+
+      - name: Install Ninja
         shell: pwsh
         run: |
           pip install ninja
-          choco install 7zip -y
           ninja --version
-          
+
       - name: Install CMake
         uses: lukka/get-cmake@latest
-        
+
       - name: Downloading LLVM project
         shell: pwsh
         run: |
-          Write-Host "Downloading LLVM 17.0.6..."
-          Invoke-WebRequest -Uri "https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/llvm-project-17.0.6.src.tar.xz" -OutFile "llvm-project.tar.xz"
-          
+          Invoke-WebRequest -Uri "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/llvm-project-18.1.8.src.tar.xz" -OutFile "llvm-project-18.1.8.src.tar.xz"
+
+      - name: Install 7zip
+        shell: pwsh
+        run: |
+          choco install 7zip -y
+
       - name: Unpacking LLVM project
         shell: pwsh
         run: |
-          Write-Host "Extracting LLVM project..."
-          7z x llvm-project.tar.xz -so | 7z x -si -ttar
-          Rename-Item -Path "llvm-project-17.0.6.src" -NewName "llvm-project"
-          
-      - name: Preparing build directories
+          7z x llvm-project-18.1.8.src.tar.xz -so | 7z x -si -ttar
+          Rename-Item -Path "llvm-project-18.1.8.src" -NewName "llvm-project"
+
+      - name: Preparing for build
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Path "llvm-project\build" -Force
-          New-Item -ItemType Directory -Path "clang-package" -Force
+          New-Item -ItemType Directory -Path "llvm-project\llvm\build" -Force
+          New-Item -ItemType Directory -Path "llvm-project\llvm\dist" -Force
         
-      - name: Configuring CMake build
+      - name: Configuring CMake (Clang)
         shell: pwsh
         run: |
-          cd llvm-project\build
-          Write-Host "Configuring LLVM/Clang build..."
-          cmake ..\llvm -G Ninja `
+          cd llvm-project\llvm\build
+          cmake ..\CMakeLists.txt -G Ninja `
             -DLLVM_ENABLE_PROJECTS="clang;lld" `
-            -DLLVM_ENABLE_RUNTIMES="compiler-rt" `
-            -DCMAKE_BUILD_TYPE=MinSizeRel `
-            -DLLVM_TARGETS_TO_BUILD="X86" `
+            -DLLVM_ENABLE_RUNTIMES="" `
             -DLLVM_ENABLE_TERMINFO=OFF `
             -DLLVM_ENABLE_ZLIB=OFF `
+            -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE `
             -DLLVM_ENABLE_LIBXML2=OFF `
             -DLLVM_INCLUDE_UTILS=OFF `
+            -DCMAKE_INSTALL_PREFIX="..\dist" `
+            -DCMAKE_BUILD_TYPE=MinSizeRel `
+            -DLLVM_TARGETS_TO_BUILD="X86" `
             -DLLVM_BUILD_TESTS=OFF `
             -DLLVM_BUILD_EXAMPLES=OFF `
             -DLLVM_INCLUDE_TESTS=OFF `
             -DLLVM_INCLUDE_EXAMPLES=OFF `
             -DLLVM_INCLUDE_DOCS=OFF `
-            -DLLVM_INCLUDE_BENCHMARKS=OFF `
-            -DLLVM_ENABLE_BINDINGS=OFF `
+            -DLLVM_ENABLE_ASSERTIONS=OFF `
+            -DLLVM_ENABLE_EXPENSIVE_CHECKS=OFF `
+            -DLLVM_ENABLE_DEBUG_RUNTIME=OFF `
             -DLLVM_OPTIMIZED_TABLEGEN=ON `
-            -DLLVM_USE_CRT_MINSIZEREL=MT
-            
-      - name: Building Clang and LLD
+            -DLLVM_USE_SPLIT_DWARF=OFF `
+            -DLLVM_ENABLE_LTO=Thin `
+            -DCLANG_ENABLE_STATIC_ANALYZER=OFF `
+            -DCLANG_ENABLE_ARCMT=OFF `
+            -DCLANG_TOOL_SCAN_BUILD_BUILD=OFF `
+            -DCLANG_TOOL_SCAN_VIEW_BUILD=OFF `
+            -DCOMPILER_RT_BUILD_SANITIZERS=OFF `
+            -DCOMPILER_RT_BUILD_XRAY=OFF `
+            -DCOMPILER_RT_BUILD_LIBFUZZER=OFF `
+            -DCOMPILER_RT_BUILD_PROFILE=OFF
+
+      - name: Building Clang and essential libraries
         shell: pwsh
         run: |
-          cd llvm-project\build
-          Write-Host "Building Clang..."
-          ninja -j $env:NUMBER_OF_PROCESSORS clang
-          Write-Host "Building LLD..."
-          ninja -j $env:NUMBER_OF_PROCESSORS lld
-          Write-Host "Building compiler-rt..."
-          ninja -j $env:NUMBER_OF_PROCESSORS compiler-rt
+          cd llvm-project\llvm\build
+          # Compilar solo Clang y LLD con las librerías mínimas necesarias
+          ninja -j $env:NUMBER_OF_PROCESSORS clang lld
           
-      - name: Organizing package structure
+          # Compilar librerías esenciales de LLVM para que Clang funcione
+          ninja -j $env:NUMBER_OF_PROCESSORS LLVMCore.lib LLVMSupport.lib LLVMAnalysis.lib LLVMCodeGen.lib LLVMMC.lib LLVMTarget.lib LLVMTransformUtils.lib LLVMScalarOpts.lib LLVMInstCombine.lib LLVMipo.lib
+
+      - name: Installing Clang
         shell: pwsh
         run: |
-          cd clang-package
-          
-          New-Item -ItemType Directory -Path "bin" -Force
-          New-Item -ItemType Directory -Path "lib" -Force
-          New-Item -ItemType Directory -Path "include" -Force
-          
-          Copy-Item "..\llvm-project\build\bin\clang.exe" -Destination "bin\"
-          Copy-Item "..\llvm-project\build\bin\lld*.exe" -Destination "bin\"
-          
-          if (Test-Path "..\llvm-project\build\lib\clang") {
-              Copy-Item "..\llvm-project\build\lib\clang" -Destination "lib\" -Recurse
-          }
-          
-          if (Test-Path "..\llvm-project\build\lib\clang\17.0.6\include") {
-              Copy-Item "..\llvm-project\build\lib\clang\17.0.6\include" -Destination "include\clang" -Recurse
-          }
-          
-          Copy-Item "..\llvm-project\clang\lib\Headers\*" -Destination "include\" -Recurse -ErrorAction SilentlyContinue
-          
-      - name: Creating manifest
+          cd llvm-project\llvm\build
+          ninja install
+
+      - name: Creating manifests
         shell: pwsh
         run: |
-          cd clang-package
-          $manifest = @{
+          cd llvm-project\llvm\build\bin
+          
+          $ClangManifest = @{
               name = "clang"
               version = "${{ env.TAG_NAME }}"
-              clang_version = "17.0.6"
+              llvm_version = "18.1.8"
               architecture = "x86_64"
               platform = "windows"
               build_date = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ" -AsUTC)
               build_id = "${{ env.BUILD_ID }}"
-              language = "c/c++"
-              type = "toolchain_bundle"
-              components = @{
-                  clang = "C/C++ compiler"
-                  lld = "LLVM linker"
-                  compiler_rt = "Runtime libraries"
-                  headers = "Standard C headers"
-              }
-              features = @{
-                  static_build = $true
-                  size_optimized = $true
-                  x86_target_only = $true
-                  windows_native = $true
-              }
               optimizations = @(
                   "size_optimized",
-                  "static_crt",
-                  "single_target"
+                  "lto_enabled",
+                  "minimal_runtime"
               )
               file = "clang-windows-x86_64.zip"
-              note = "Complete Clang toolchain with LLD linker and runtime libraries"
+              executables = @(
+                  "clang.exe",
+                  "clang++.exe"
+              )
           }
           
-          $manifest | ConvertTo-Json -Depth 4 | Out-File -FilePath "clang-manifest.json" -Encoding UTF8
+          $LldManifest = @{
+              name = "lld"
+              version = "${{ env.TAG_NAME }}"
+              llvm_version = "18.1.8"
+              architecture = "x86_64"
+              platform = "windows"
+              build_date = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ" -AsUTC)
+              build_id = "${{ env.BUILD_ID }}"
+              optimizations = @(
+                  "size_optimized",
+                  "lto_enabled"
+              )
+              file = "lld-windows-x86_64.zip"
+              executables = @(
+                  "lld.exe",
+                  "ld.lld.exe",
+                  "lld-link.exe"
+              )
+          }
           
-      - name: Packaging Clang toolchain
+          $LibrariesManifest = @{
+              name = "clang-libraries"
+              version = "${{ env.TAG_NAME }}"
+              llvm_version = "18.1.8"
+              architecture = "x86_64"
+              platform = "windows"
+              build_date = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ" -AsUTC)
+              build_id = "${{ env.BUILD_ID }}"
+              description = "Essential LLVM libraries for Clang compilation"
+              file = "clang-libraries-windows-x86_64.zip"
+              libraries = @(
+                  "LLVMCore.lib",
+                  "LLVMSupport.lib", 
+                  "LLVMAnalysis.lib",
+                  "LLVMCodeGen.lib",
+                  "LLVMMC.lib",
+                  "LLVMTarget.lib",
+                  "LLVMTransformUtils.lib",
+                  "LLVMScalarOpts.lib",
+                  "LLVMInstCombine.lib",
+                  "LLVMipo.lib"
+              )
+          }
+
+          # Guardar manifests como JSON
+          $ClangManifest | ConvertTo-Json -Depth 10 | Out-File -FilePath "clang-manifest.json" -Encoding UTF8
+          $LldManifest | ConvertTo-Json -Depth 10 | Out-File -FilePath "lld-manifest.json" -Encoding UTF8
+          $LibrariesManifest | ConvertTo-Json -Depth 10 | Out-File -FilePath "libraries-manifest.json" -Encoding UTF8
+
+      - name: Packaging Clang binaries
         shell: pwsh
         run: |
-          7z a -tzip clang-windows-x86_64.zip clang-package\*
+          cd llvm-project\llvm\build\bin
           
+          7z a -tzip clang-windows-x86_64.zip clang.exe clang++.exe
+          7z a -tzip lld-windows-x86_64.zip lld.exe ld.lld.exe lld-link.exe
+
+      - name: Packaging essential libraries
+        shell: pwsh
+        run: |
+          cd llvm-project\llvm\build
+          New-Item -ItemType Directory -Path "essential_libs" -Force
+          
+          Copy-Item "lib\LLVMCore.lib" "essential_libs\"
+          Copy-Item "lib\LLVMSupport.lib" "essential_libs\"
+          Copy-Item "lib\LLVMAnalysis.lib" "essential_libs\"
+          Copy-Item "lib\LLVMCodeGen.lib" "essential_libs\"
+          Copy-Item "lib\LLVMMC.lib" "essential_libs\"
+          Copy-Item "lib\LLVMTarget.lib" "essential_libs\"
+          Copy-Item "lib\LLVMTransformUtils.lib" "essential_libs\"
+          Copy-Item "lib\LLVMScalarOpts.lib" "essential_libs\"
+          Copy-Item "lib\LLVMInstCombine.lib" "essential_libs\"
+          Copy-Item "lib\LLVMipo.lib" "essential_libs\"
+          
+          # Empaquetar librerías
+          7z a -tzip bin\clang-libraries-windows-x86_64.zip essential_libs\*
+
+      - name: Packaging includes
+        shell: pwsh
+        run: |
+          cd llvm-project\llvm\dist
+          7z a -tzip includes-windows-x86_64.zip include
+
       - name: Releasing Clang (Windows)
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.BUILD_ID }}
           name: "Clang x86_64 (Windows)"
           body: |
-            ## Clang (Windows)
+            ## Clang x86_64
            
-            Complete Clang C/C++ compiler toolchain with LLD linker for Windows x86_64.
+            Optimized Clang compiler with essential libraries for Windows x86_64 environments.
             
           files: |
-            clang-windows-x86_64.zip
-            clang-package/clang-manifest.json
+            llvm-project/llvm/build/bin/clang-windows-x86_64.zip
+            llvm-project/llvm/build/bin/lld-windows-x86_64.zip
+            llvm-project/llvm/build/bin/clang-libraries-windows-x86_64.zip
+            llvm-project/llvm/dist/includes-windows-x86_64.zip
+            llvm-project/llvm/build/bin/clang-manifest.json
+            llvm-project/llvm/build/bin/lld-manifest.json
+            llvm-project/llvm/build/bin/libraries-manifest.json
             
           draft: false
