@@ -43,8 +43,8 @@ jobs:
           
       - name: Preparing build directories
         run: |
-          mkdir -p llvm-project/build
-          mkdir -p llvm-project/dist
+          mkdir -p llvm-project/llvm/build
+          mkdir -p llvm-project/llvm/dist
           
       - name: Configuring CMake (Static Minimal Clang)
         run: |
@@ -105,12 +105,12 @@ jobs:
             -DCLANG_BUILD_EXAMPLES=OFF \
             -DCLANG_INCLUDE_TESTS=OFF \
             -DCLANG_INCLUDE_DOCS=OFF \
-        working-directory: llvm-project/build
+        working-directory: llvm-project/llvm/build
         
       - name: Building minimal Clang and LLD
         run: |
           ninja -j$(nproc) clang lld
-        working-directory: llvm-project/build
+        working-directory: llvm-project/llvm/build
         
       - name: Optimizing binaries
         run: |
@@ -122,7 +122,7 @@ jobs:
           # Mostrar tamaños finales
           echo "=== Binary sizes after optimization ==="
           ls -lh bin/clang* bin/lld* bin/ld.lld || true
-        working-directory: llvm-project/build
+        working-directory: llvm-project/llvm/build
         
       - name: Creating minimal runtime
         run: |
@@ -145,7 +145,7 @@ jobs:
           # Mostrar estructura final
           echo "=== Final structure ==="
           find clang-minimal -type f -exec ls -lh {} \;
-        working-directory: llvm-project/build
+        working-directory: llvm-project/llvm/build
         
       - name: Packaging minimal Clang
         run: |
@@ -154,8 +154,8 @@ jobs:
           
           # Mostrar tamaño final
           echo "=== Package size ==="
-          ls -lh clang-minimal-static.tar.xz
-        working-directory: llvm-project/build
+          ls -lh clang.tar.xz
+        working-directory: llvm-project/llvm/build
         
       - name: Releasing Minimal Static Clang x86_64 (Linux)
         uses: softprops/action-gh-release@v2
@@ -170,6 +170,6 @@ jobs:
             ${{ env.BINARY_SIZES }}
             
           files: |
-            llvm-project/build/clang.tar.xz
+            llvm-project/llvm/build/clang.tar.xz
             
           draft: false
