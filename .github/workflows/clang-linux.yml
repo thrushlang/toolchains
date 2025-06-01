@@ -108,7 +108,7 @@ jobs:
         
       - name: Building minimal Clang and LLD
         run: |
-          ninja -j$(nproc) clang lld
+          ninja -j$(nproc)
         working-directory: llvm-project/llvm/build
         
       - name: Optimizing binaries
