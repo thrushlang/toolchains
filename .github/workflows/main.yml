@@ -1,0 +1,178 @@
+name: LLVM-C API (Linux) - Static Minimal
+on:
+  push:
+    tags:
+      - 'CLANG-LINUX-v*.*.*'
+jobs:
+  build-llvm:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+  
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+  
+    steps:
+      - name: Generating Unique ID
+        run: |
+          BASE_NAME=$(echo "$GITHUB_REF" | sed 's|^refs/tags/||')
+          BUILD_ID="${BASE_NAME}-$GITHUB_RUN_ID" 
+          TAG_NAME=$(echo "$GITHUB_REF" | sed 's|^refs/tags/||')
+          
+          echo "BUILD_ID=$BUILD_ID" >> $GITHUB_ENV
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+          echo "Unique ID: $BUILD_ID"
+          echo "Base name: $TAG_NAME"
+    
+      - name: Downloading LLVM project
+        run: |
+          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/llvm-project-17.0.6.src.tar.xz
+          
+      - name: Unpacking LLVM project 
+        run: |
+          tar -xf llvm-project-17.0.6.src.tar.xz
+          mv llvm-project-17.0.6.src llvm-project
+          
+      - name: Installing dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake ninja-build python3 libz-dev binutils xz-utils upx-ucl
+          # Remover versiones conflictivas
+          sudo apt-get remove -y llvm-16* clang-16* || true
+          sudo rm -rf /usr/lib/llvm-16 || true
+          
+      - name: Preparing build directories
+        run: |
+          mkdir -p llvm-project/build
+          mkdir -p llvm-project/dist
+          
+      - name: Configuring CMake (Static Minimal Clang)
+        run: |
+          cmake ../llvm \
+            -G Ninja \
+            -DCMAKE_C_COMPILER="gcc" \
+            -DCMAKE_CXX_COMPILER="g++" \
+            -DCMAKE_BUILD_TYPE=MinSizeRel \
+            -DCMAKE_INSTALL_PREFIX="../dist" \
+            -DLLVM_ENABLE_PROJECTS="clang;lld" \
+            -DLLVM_BUILD_LLVM_DYLIB=OFF \
+            -DLLVM_LINK_LLVM_DYLIB=OFF \
+            -DCLANG_LINK_CLANG_DYLIB=OFF \
+            -DLLVM_BUILD_SHARED_LIBS=OFF \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCLANG_BUILD_TOOLS=ON \
+            \
+            -DLLVM_OPTIMIZED_TABLEGEN=ON \
+            -DLLVM_USE_SPLIT_DWARF=ON \
+            -DLLVM_ENABLE_LTO=Thin \
+            -DCMAKE_C_FLAGS="-Os -ffunction-sections -fdata-sections" \
+            -DCMAKE_CXX_FLAGS="-Os -ffunction-sections -fdata-sections" \
+            -DCMAKE_EXE_LINKER_FLAGS="-static-libgcc -static-libstdc++ -Wl,--gc-sections -Wl,--strip-all" \
+            \
+            `# Deshabilitar características innecesarias` \
+            -DLLVM_BUILD_RUNTIME=OFF \
+            -DLLVM_BUILD_RUNTIMES=OFF \
+            -DLLVM_ENABLE_TERMINFO=OFF \
+            -DLLVM_ENABLE_ZLIB=OFF \
+            -DLLVM_ENABLE_ZSTD=OFF \
+            -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE \
+            -DLLVM_ENABLE_LIBXML2=OFF \
+            -DLLVM_ENABLE_LIBPFM=OFF \
+            -DLLVM_ENABLE_LIBEDIT=OFF \
+            -DLLVM_ENABLE_Z3_SOLVER=OFF \
+            -DLLVM_ENABLE_RTTI=OFF \
+            -DLLVM_ENABLE_EH=OFF \
+            -DLLVM_ENABLE_UNWIND_TABLES=OFF \
+            \
+            `# Deshabilitar utilidades innecesarias` \
+            -DLLVM_INCLUDE_UTILS=OFF \
+            -DLLVM_INCLUDE_TOOLS=OFF \
+            -DLLVM_BUILD_TOOLS=OFF \
+            -DLLVM_INCLUDE_EXAMPLES=OFF \
+            -DLLVM_BUILD_EXAMPLES=OFF \
+            -DLLVM_INCLUDE_TESTS=OFF \
+            -DLLVM_BUILD_TESTS=OFF \
+            -DLLVM_INCLUDE_DOCS=OFF \
+            -DLLVM_ENABLE_DOXYGEN=OFF \
+            -DLLVM_ENABLE_SPHINX=OFF \
+            \
+            `# Solo targets necesarios para linking` \
+            -DLLVM_TARGETS_TO_BUILD="X86;AArch64" \
+            \
+            `# Clang específico - solo lo mínimo para linking` \
+            -DCLANG_ENABLE_STATIC_ANALYZER=OFF \
+            -DCLANG_ENABLE_ARCMT=OFF \
+            -DCLANG_BUILD_EXAMPLES=OFF \
+            -DCLANG_INCLUDE_TESTS=OFF \
+            -DCLANG_INCLUDE_DOCS=OFF \
+            \
+            `# LLD para linking` \
+            -DLLVM_ENABLE_LLD=ON
+        working-directory: llvm-project/build
+        
+      - name: Building minimal Clang and LLD
+        run: |
+          ninja -j$(nproc) clang lld
+        working-directory: llvm-project/build
+        
+      - name: Optimizing binaries
+        run: |
+          # Strip agresivo
+          strip --strip-all bin/clang* || true
+          strip --strip-all bin/lld* || true
+          strip --strip-all bin/ld.lld || true
+          
+          # Mostrar tamaños finales
+          echo "=== Binary sizes after optimization ==="
+          ls -lh bin/clang* bin/lld* bin/ld.lld || true
+        working-directory: llvm-project/build
+        
+      - name: Creating minimal runtime
+        run: |
+          # Crear directorio mínimo con solo lo necesario para linking
+          mkdir -p clang-minimal/{bin,lib}
+          
+          # Copiar binarios necesarios
+          cp bin/clang clang-minimal/bin/ || true
+          cp bin/clang-17 clang-minimal/bin/ || true
+          cp bin/lld clang-minimal/bin/ || true
+          cp bin/ld.lld clang-minimal/bin/ || true
+          
+          # Crear symlinks necesarios
+          cd clang-minimal/bin
+          ln -sf clang clang++ || true
+          ln -sf clang cc || true
+          ln -sf ld.lld ld || true
+          cd ../..
+          
+          # Mostrar estructura final
+          echo "=== Final structure ==="
+          find clang-minimal -type f -exec ls -lh {} \;
+        working-directory: llvm-project/build
+        
+      - name: Packaging minimal Clang
+        run: |
+          # Crear archivo comprimido con máxima compresión
+          tar --format=posix -cJf clang.tar.xz clang-minimal/
+          
+          # Mostrar tamaño final
+          echo "=== Package size ==="
+          ls -lh clang-minimal-static.tar.xz
+        working-directory: llvm-project/build
+        
+      - name: Releasing Minimal Static Clang x86_64 (Linux)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.BUILD_ID }}
+          name: "Clang x86_64 (Linux)"
+          body: |
+            ## Clang
+           
+            Minimal, statically-linked Clang build optimized for linking only.
+            
+            ${{ env.BINARY_SIZES }}
+            
+          files: |
+            llvm-project/build/clang.tar.xz
+            
+          draft: false
