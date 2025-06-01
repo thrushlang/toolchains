@@ -59,14 +59,11 @@ jobs:
             -DCLANG_LINK_CLANG_DYLIB=OFF \
             -DLLVM_BUILD_SHARED_LIBS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
-            \
             -DLLVM_OPTIMIZED_TABLEGEN=ON \
             -DLLVM_USE_SPLIT_DWARF=ON \
             -DCMAKE_C_FLAGS="-Os -ffunction-sections -fdata-sections" \
             -DCMAKE_CXX_FLAGS="-Os -ffunction-sections -fdata-sections" \
             -DCMAKE_EXE_LINKER_FLAGS="-static-libgcc -static-libstdc++ -Wl,--gc-sections -Wl,--strip-all" \
-            \
-            `# Deshabilitar características innecesarias` \
             -DLLVM_BUILD_RUNTIME=OFF \
             -DLLVM_ENABLE_TERMINFO=OFF \
             -DLLVM_ENABLE_ZLIB=OFF \
@@ -79,8 +76,6 @@ jobs:
             -DLLVM_ENABLE_RTTI=OFF \
             -DLLVM_ENABLE_EH=OFF \
             -DLLVM_ENABLE_UNWIND_TABLES=OFF \
-            \
-            `# Deshabilitar utilidades innecesarias` \
             -DLLVM_INCLUDE_UTILS=OFF \
             -DLLVM_INCLUDE_TOOLS=OFF \
             -DLLVM_BUILD_TOOLS=OFF \
@@ -91,64 +86,60 @@ jobs:
             -DLLVM_INCLUDE_DOCS=OFF \
             -DLLVM_ENABLE_DOXYGEN=OFF \
             -DLLVM_ENABLE_SPHINX=OFF \
-            \
-            `# Solo targets necesarios para linking` \
             -DLLVM_TARGETS_TO_BUILD="X86" \
-            \
-            `# Clang específico - solo lo mínimo para linking` \
             -DCLANG_ENABLE_STATIC_ANALYZER=OFF \
             -DCLANG_ENABLE_ARCMT=OFF \
             -DCLANG_BUILD_EXAMPLES=OFF \
             -DCLANG_INCLUDE_TESTS=OFF \
-            -DCLANG_INCLUDE_DOCS=OFF \
+            -DCLANG_INCLUDE_DOCS=OFF
+        working-directory: llvm-project/llvm/build
+        
+      - name: List available targets
+        run: |
+          echo "=== Available ninja targets ==="
+          ninja -t targets | grep -E "(clang|lld)" |
         working-directory: llvm-project/llvm/build
         
       - name: Building minimal Clang and LLD
         run: |
-          ninja clang lld
+          # Build the correct targets
+          ninja clang-17 lld
         working-directory: llvm-project/llvm/build
         
       - name: Optimizing binaries
         run: |
-          # Strip agresivo
-          strip --strip-all bin/clang* || true
-          strip --strip-all bin/lld* || true
+          strip --strip-all bin/clang-17 || true
+          strip --strip-all bin/lld || true
           strip --strip-all bin/ld.lld || true
           
-          # Mostrar tamaños finales
           echo "=== Binary sizes after optimization ==="
-          ls -lh bin/clang* bin/lld* bin/ld.lld || true
+          ls -lh bin/clang-17 bin/lld bin/ld.lld || true
         working-directory: llvm-project/llvm/build
         
       - name: Creating minimal runtime
         run: |
-          # Crear directorio mínimo con solo lo necesario para linking
           mkdir -p clang-minimal/{bin,lib}
           
-          # Copiar binarios necesarios
-          cp bin/clang clang-minimal/bin/ || true
+          # Copy available binaries
           cp bin/clang-17 clang-minimal/bin/ || true
-          cp bin/lld clang-minimal/bin/ || true
+          cp bin/lld clang-minimal/bin/ || true  
           cp bin/ld.lld clang-minimal/bin/ || true
           
-          # Crear symlinks necesarios
+          # Create symlinks
           cd clang-minimal/bin
-          ln -sf clang clang++ || true
-          ln -sf clang cc || true
+          ln -sf clang-17 clang || true
+          ln -sf clang-17 clang++ || true
+          ln -sf clang-17 cc || true
           ln -sf ld.lld ld || true
           cd ../..
           
-          # Mostrar estructura final
           echo "=== Final structure ==="
           find clang-minimal -type f -exec ls -lh {} \;
         working-directory: llvm-project/llvm/build
         
       - name: Packaging minimal Clang
         run: |
-          # Crear archivo comprimido con máxima compresión
           tar --format=posix -cJf clang.tar.xz clang-minimal/
-          
-          # Mostrar tamaño final
           echo "=== Package size ==="
           ls -lh clang.tar.xz
         working-directory: llvm-project/llvm/build
@@ -162,8 +153,6 @@ jobs:
             ## Clang
            
             Minimal, statically-linked Clang build optimized for linking only.
-            
-            ${{ env.BINARY_SIZES }}
             
           files: |
             llvm-project/llvm/build/clang.tar.xz
