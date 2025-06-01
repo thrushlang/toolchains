@@ -96,7 +96,7 @@ jobs:
 
       - name: Packaging Clang
         run: |
-          tar --format=pax -cJf clang.tar.xz clang
+          tar --format=pax -cJf clang.tar.xz clang-17
         working-directory: llvm-project/clang/build/bin
 
       - name: Packaging LLVM C API (Includes)
