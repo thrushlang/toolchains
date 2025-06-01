@@ -50,7 +50,7 @@ jobs:
                 -DCMAKE_C_FLAGS="-Oz -ffunction-sections -fdata-sections -fno-unwind-tables -fno-asynchronous-unwind-tables" \
                 -DCMAKE_CXX_FLAGS="-Oz -ffunction-sections -fdata-sections -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-rtti" \
                 -DCMAKE_EXE_LINKER_FLAGS="-static-libgcc -static-libstdc++ -Wl,--gc-sections -Wl,--strip-all -s" \
-                -DCMAKE_CXX_COMPILER="clang++ \
+                -DCMAKE_CXX_COMPILER="clang++" \
                 -DLLVM_ENABLE_PROJECTS="clang;lld" \
                 -DLLVM_ENABLE_TERMINFO=OFF \
                 -DLLVM_ENABLE_ZLIB=OFF \
@@ -73,7 +73,7 @@ jobs:
                 -DLLVM_ENABLE_LTO=Thin \
                 -DCLANG_ENABLE_ARCMT=OFF \
                 -DCLANG_TOOL_SCAN_BUILD_BUILD=OFF \
-                -DCLANG_TOOL_SCAN_VIEW_BUILD=OFF
+                -DCLANG_TOOL_SCAN_VIEW_BUILD=OFF \
         working-directory: llvm-project/llvm/build
       - name: Building Clang
         run: |
