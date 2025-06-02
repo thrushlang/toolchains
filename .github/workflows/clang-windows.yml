@@ -80,6 +80,8 @@ jobs:
           -DCMAKE_BUILD_TYPE=MinSizeRel `
           -DCMAKE_INSTALL_PREFIX="..\dist" `
           -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE `
+          -DCMAKE_C_COMPILER_TARGET=x86_64-pc-windows-msvc `
+          -DCMAKE_CXX_COMPILER_TARGET=x86_64-pc-windows-msvc `
           `
           -DLLVM_ENABLE_PROJECTS="clang;lld;compiler-rt" `
           -DLLVM_TARGETS_TO_BUILD="X86" `
