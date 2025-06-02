@@ -121,7 +121,7 @@ jobs:
         shell: pwsh
         run: |
           cd llvm-project\llvm\build
-          ninja -j $env:NUMBER_OF_PROCESSORS clang lld libc compiler-rt
+          ninja -j $env:NUMBER_OF_PROCESSORS clang lld compiler-rt
 
       - name: Installing Clang and compiler-rt
         shell: pwsh
