@@ -34,7 +34,7 @@ jobs:
       - name: Installing dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake ninja-build python3 libz-dev binutils xz-utils upx-ucl
+          sudo apt-get install -y build-essential cmake ninja-build python3 libz-dev binutils xz-utils upx-ucl lld
       - name: Preparing CMake (Clang)
         run: |
           mkdir build 
@@ -53,6 +53,7 @@ jobs:
               -DCMAKE_EXE_LINKER_FLAGS="-static-libgcc -static-libstdc++ -Wl,--gc-sections -Wl,--strip-all -s" \
               -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE \
               \
+              -DLLVM_USE_LINKER=lld \
               -DLLVM_ENABLE_PROJECTS="clang;lld" \
               -DLLVM_TARGETS_TO_BUILD="X86" \
               -DLLVM_OPTIMIZED_TABLEGEN=ON \
