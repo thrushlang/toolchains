@@ -84,6 +84,7 @@ jobs:
             -DLLVM_INCLUDE_UTILS=OFF `
             -DLLVM_INCLUDE_TOOLS=OFF `
             -DLLVM_INCLUDE_UTILS=OFF `
+            -DCLANG_BUILD_TESTS=OFF `
             -DCMAKE_INSTALL_PREFIX="..\dist" `
             -DCMAKE_BUILD_TYPE=MinSizeRel `
             -DLLVM_TARGETS_TO_BUILD="X86" `
