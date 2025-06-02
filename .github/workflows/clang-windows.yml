@@ -83,14 +83,13 @@ jobs:
             -DLLVM_ENABLE_LIBXML2=OFF `
             -DLLVM_INCLUDE_UTILS=OFF `
             -DLLVM_INCLUDE_TOOLS=OFF `
-            -DLLVM_INCLUDE_UTILS=OFF `
+            -DLLVM_INCLUDE_UTILS=OFF ` 
             -DCLANG_BUILD_TESTS=OFF `
             -DCMAKE_INSTALL_PREFIX="..\dist" `
             -DCMAKE_BUILD_TYPE=MinSizeRel `
             -DLLVM_TARGETS_TO_BUILD="X86" `
             -DLLVM_BUILD_TESTS=OFF `
             -DLLVM_BUILD_EXAMPLES=OFF `
-            -DLLVM_INCLUDE_TESTS=OFF `
             -DLLVM_BUILD_UTILS=OFF `
             -DLLVM_BUILD_TOOLS=OFF `
             -DCLANG_BUILD_TOOLS=OFF `
