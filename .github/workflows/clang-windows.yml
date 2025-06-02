@@ -69,6 +69,8 @@ jobs:
         run: |
           New-Item -ItemType Directory -Path "llvm-project\llvm\build" -Force
           New-Item -ItemType Directory -Path "llvm-project\llvm\dist" -Force
+          New-Item -ItemType Directory -Path "llvm-project\compiler-rt\build" -Force
+          New-Item -ItemType Directory -Path "llvm-project\compiler-rt\dist" -Force
         
       - name: Configuring CMake (Clang)
         shell: pwsh
@@ -79,8 +81,7 @@ jobs:
           -DCMAKE_INSTALL_PREFIX="..\dist" `
           -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE `
           `
-          -DLLVM_ENABLE_PROJECTS="clang;lld" `
-          -DLLVM_ENABLE_RUNTIMES="libc" `
+          -DLLVM_ENABLE_PROJECTS="clang;lld;compiler-rt" `
           -DLLVM_TARGETS_TO_BUILD="X86" `
           -DLLVM_OPTIMIZED_TABLEGEN=ON `
           -DLLVM_ENABLE_TERMINFO=OFF `
@@ -94,7 +95,6 @@ jobs:
           -DLLVM_BUILD_UTILS=OFF `
           -DLLVM_BUILD_TESTS=OFF `
           -DLLVM_BUILD_EXAMPLES=OFF `
-          -DLLVM_INCLUDE_UTILS=OFF `
           -DLLVM_INCLUDE_EXAMPLES=OFF `
           -DLLVM_INCLUDE_DOCS=OFF `
           -DLLVM_INSTALL_BINUTILS_SYMLINKS=OFF `
@@ -106,22 +106,35 @@ jobs:
           -DCLANG_TOOL_SCAN_BUILD_BUILD=OFF `
           -DCLANG_TOOL_SCAN_VIEW_BUILD=OFF `
           `
+          -DCOMPILER_RT_BUILD_BUILTINS=ON `
+          -DCOMPILER_RT_BUILD_CRT=ON `
           -DCOMPILER_RT_BUILD_SANITIZERS=OFF `
           -DCOMPILER_RT_BUILD_XRAY=OFF `
           -DCOMPILER_RT_BUILD_LIBFUZZER=OFF `
-          -DCOMPILER_RT_BUILD_PROFILE=OFF
+          -DCOMPILER_RT_BUILD_PROFILE=OFF `
+          -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON `
+          -DCOMPILER_RT_INCLUDE_TESTS=OFF
 
       - name: Building Clang and essential libraries
         shell: pwsh
         run: |
           cd llvm-project\llvm\build
-          ninja -j $env:NUMBER_OF_PROCESSORS clang lld libc
+          ninja -j $env:NUMBER_OF_PROCESSORS clang lld libc compiler-rt
 
-      - name: Installing Clang
+      - name: Installing Clang and compiler-rt
         shell: pwsh
         run: |
           cd llvm-project\llvm\build
           ninja install
+
+      - name: Verify compiler-rt installation
+        shell: pwsh
+        run: |
+          cd llvm-project\llvm\dist
+          Write-Host "=== Compiler-RT files installed ==="
+          Get-ChildItem -Recurse -Filter "*clang_rt*" | ForEach-Object { Write-Host $_.FullName }
+          Get-ChildItem -Recurse -Filter "*crt*.lib" | ForEach-Object { Write-Host $_.FullName }
+          Get-ChildItem -Recurse -Filter "*crt*.obj" | ForEach-Object { Write-Host $_.FullName }
 
       - name: Creating manifests
         shell: pwsh
@@ -141,10 +154,21 @@ jobs:
                   "lto_enabled",
                   "minimal_runtime"
               )
+              components = @(
+                  "clang_compiler",
+                  "lld_linker",
+                  "compiler_rt_builtins",
+                  "compiler_rt_crt"
+              )
               file = "clang-windows-x86_64.zip"
               executables = @(
                   "clang.exe",
-                  "clang++.exe"
+                  "clang++.exe",
+                  "lld.exe"
+              )
+              runtime_libraries = @(
+                  "libclang_rt.builtins-x86_64.lib",
+                  "clang_rt.crt-x86_64.lib"
               )
           }
           
@@ -157,10 +181,12 @@ jobs:
           
           7z a -tzip clang-windows-x86_64.zip bin
 
+      - name: Packaging libraries (including compiler-rt)
+        shell: pwsh
+        run: |
           cd llvm-project\llvm\dist
           
           7z a -tzip libraries-windows-x86_64.zip lib
-          7z a -tzip runtimes-windows-x86_64.zip runtimes
 
       - name: Packaging includes
         shell: pwsh
@@ -168,23 +194,45 @@ jobs:
           cd llvm-project\llvm\dist
           7z a -tzip includes-windows-x86_64.zip include
 
+      - name: Packaging compiler-rt runtime
+        shell: pwsh
+        run: |
+          cd llvm-project\llvm\dist
+          
+          New-Item -ItemType Directory -Path "compiler-rt-runtime" -Force
+          
+          Get-ChildItem -Recurse -Filter "*clang_rt*" | Copy-Item -Destination "compiler-rt-runtime\" -Force
+          Get-ChildItem -Recurse -Filter "*crt*.lib" | Copy-Item -Destination "compiler-rt-runtime\" -Force
+          Get-ChildItem -Recurse -Filter "*crt*.obj" | Copy-Item -Destination "compiler-rt-runtime\" -Force
+          
+          $RuntimeManifest = @{
+              name = "compiler-rt-runtime"
+              version = "${{ env.TAG_NAME }}"
+              platform = "windows"
+              architecture = "x86_64"
+              description = "Compiler-RT runtime libraries and CRT objects"
+              files = (Get-ChildItem "compiler-rt-runtime" | Select-Object -ExpandProperty Name)
+          }
+          
+          $RuntimeManifest | ConvertTo-Json -Depth 10 | Out-File -FilePath "compiler-rt-runtime\runtime-manifest.json" -Encoding UTF8
+          
+          7z a -tzip compiler-rt-runtime-windows-x86_64.zip compiler-rt-runtime
+
       - name: Releasing Clang (Windows)
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.BUILD_ID }}
-          name: "Clang x86_64 (Windows)"
+          name: "Clang x86_64 with Compiler-RT (Windows)"
           body: |
-            ## Clang x86_64
+            ## Clang x86_64 with Compiler-RT Runtime
            
-            Optimized Clang compiler with essential libraries for Windows x86_64 environments.
+            Clang compiler with essential libraries and compiler-rt runtime for Windows x86_64 environments.
             
           files: |
             llvm-project/llvm/build/clang-windows-x86_64.zip
-            
-            llvm-project/llvm/build/libraries-windows-x86_64.zip
-            llvm-project/llvm/dist/runtimes-windows-x86_64.zip
+            llvm-project/llvm/dist/libraries-windows-x86_64.zip
             llvm-project/llvm/dist/includes-windows-x86_64.zip
-            
+            llvm-project/llvm/dist/compiler-rt-runtime-windows-x86_64.zip
             llvm-project/llvm/build/bin/clang-manifest.json
             
           draft: false
