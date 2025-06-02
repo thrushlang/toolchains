@@ -128,15 +128,6 @@ jobs:
           cd llvm-project\llvm\build
           ninja install
 
-      - name: Verify compiler-rt installation
-        shell: pwsh
-        run: |
-          cd llvm-project\llvm\dist
-          Write-Host "=== Compiler-RT files installed ==="
-          Get-ChildItem -Recurse -Filter "*clang_rt*" | ForEach-Object { Write-Host $_.FullName }
-          Get-ChildItem -Recurse -Filter "*crt*.lib" | ForEach-Object { Write-Host $_.FullName }
-          Get-ChildItem -Recurse -Filter "*crt*.obj" | ForEach-Object { Write-Host $_.FullName }
-
       - name: Creating manifests
         shell: pwsh
         run: |
