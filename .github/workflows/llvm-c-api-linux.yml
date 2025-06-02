@@ -42,28 +42,6 @@ jobs:
           sudo apt-get remove -y llvm-16* clang-16*
           sudo rm -rf /usr/lib/llvm-16
 
-      - name: Configuring CMake (Clang)
-        run: |
-          mkdir build
-          mkdir dist
-          cd build
-        working-directory: llvm-project/clang
-
-      - name: Configuring CMake (Clang)
-        run: |
-          cmake ../CMakeLists.txt -G Ninja -DCMAKE_C_COMPILER="gcc" -DCMAKE_CXX_COMPILER="g++" -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_BUILD_RUNTIME=OFF -DLLVM_ENABLE_TERMINFO=OFF -DLLVM_ENABLE_ZLIB=OFF -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE -DLLVM_ENABLE_LIBXML2=0 -DLLVM_ENABLE_LIBPFM=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_Z3_SOLVER=OFF -DLLVM_ENABLE_RTTI=OFF -DLLVM_INCLUDE_UTILS=OFF -DCMAKE_INSTALL_PREFIX="../dist" -DCMAKE_BUILD_TYPE=MinSizeReel -DLLVM_BUILD_TESTS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_DOCS=OFF
-        working-directory: llvm-project/clang/build
-
-      - name: Building Clang
-        run: |
-          ninja -j$(nproc) clang
-        working-directory: llvm-project/clang/build
-
-      - name: Optimizing Clang
-        run: |
-          strip bin/clang
-        working-directory: llvm-project/clang/build
-
       - name: Preparing for build (LLVM-C API)
         run: |
           mkdir build
