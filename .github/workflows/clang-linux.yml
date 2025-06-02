@@ -35,9 +35,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential cmake ninja-build python3 libz-dev binutils xz-utils upx-ucl
-      - name: Configuring CMake (Clang)
+      - name: Preparing CMake (Clang)
         run: |
-          mkdir build
+          mkdir build 
           mkdir dist
           cd build
         working-directory: llvm-project/llvm
@@ -67,7 +67,6 @@ jobs:
                 -DLLVM_BUILD_TESTS=OFF \
                 -DLLVM_INCLUDE_UTILS=OFF 
                 -DLLVM_BUILD_EXAMPLES=OFF \
-                -DLLVM_INCLUDE_TESTS=OFF \
                 -DLLVM_INCLUDE_EXAMPLES=OFF \
                 -DLLVM_INCLUDE_DOCS=OFF \
                 -DLLVM_ENABLE_ASSERTIONS=OFF \
