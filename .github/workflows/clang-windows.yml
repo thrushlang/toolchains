@@ -76,11 +76,13 @@ jobs:
           cd llvm-project\llvm\build
           cmake ..\CMakeLists.txt -G Ninja `
             -DLLVM_ENABLE_PROJECTS="clang;lld" `
-            -DLLVM_ENABLE_RUNTIMES="" `
+            -DLLVM_ENABLE_RUNTIMES="libc" `
             -DLLVM_ENABLE_TERMINFO=OFF `
             -DLLVM_ENABLE_ZLIB=OFF `
             -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE `
             -DLLVM_ENABLE_LIBXML2=OFF `
+            -DLLVM_INCLUDE_UTILS=OFF `
+            -DLLVM_INCLUDE_TOOLS=OFF `
             -DLLVM_INCLUDE_UTILS=OFF `
             -DCMAKE_INSTALL_PREFIX="..\dist" `
             -DCMAKE_BUILD_TYPE=MinSizeRel `
@@ -88,6 +90,10 @@ jobs:
             -DLLVM_BUILD_TESTS=OFF `
             -DLLVM_BUILD_EXAMPLES=OFF `
             -DLLVM_INCLUDE_TESTS=OFF `
+            -DLLVM_BUILD_UTILS=OFF `
+            -DLLVM_BUILD_TOOLS=OFF `
+            -DCLANG_BUILD_TOOLS=OFF `
+            -DLLVM_INSTALL_BINUTILS_SYMLINKS=OFF `
             -DLLVM_INCLUDE_EXAMPLES=OFF `
             -DLLVM_INCLUDE_DOCS=OFF `
             -DLLVM_ENABLE_ASSERTIONS=OFF `
@@ -109,10 +115,7 @@ jobs:
         run: |
           cd llvm-project\llvm\build
           # Compilar solo Clang y LLD con las librerías mínimas necesarias
-          ninja -j $env:NUMBER_OF_PROCESSORS clang lld
-          
-          # Compilar librerías esenciales de LLVM para que Clang funcione
-          ninja -j $env:NUMBER_OF_PROCESSORS LLVMCore.lib LLVMSupport.lib LLVMAnalysis.lib LLVMCodeGen.lib LLVMMC.lib LLVMTarget.lib LLVMTransformUtils.lib LLVMScalarOpts.lib LLVMInstCombine.lib LLVMipo.lib
+          ninja -j $env:NUMBER_OF_PROCESSORS clang lld libc
 
       - name: Installing Clang
         shell: pwsh
@@ -145,82 +148,19 @@ jobs:
               )
           }
           
-          $LldManifest = @{
-              name = "lld"
-              version = "${{ env.TAG_NAME }}"
-              llvm_version = "18.1.8"
-              architecture = "x86_64"
-              platform = "windows"
-              build_date = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ" -AsUTC)
-              build_id = "${{ env.BUILD_ID }}"
-              optimizations = @(
-                  "size_optimized",
-                  "lto_enabled"
-              )
-              file = "lld-windows-x86_64.zip"
-              executables = @(
-                  "lld.exe",
-                  "ld.lld.exe",
-                  "lld-link.exe"
-              )
-          }
-          
-          $LibrariesManifest = @{
-              name = "clang-libraries"
-              version = "${{ env.TAG_NAME }}"
-              llvm_version = "18.1.8"
-              architecture = "x86_64"
-              platform = "windows"
-              build_date = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ" -AsUTC)
-              build_id = "${{ env.BUILD_ID }}"
-              description = "Essential LLVM libraries for Clang compilation"
-              file = "clang-libraries-windows-x86_64.zip"
-              libraries = @(
-                  "LLVMCore.lib",
-                  "LLVMSupport.lib", 
-                  "LLVMAnalysis.lib",
-                  "LLVMCodeGen.lib",
-                  "LLVMMC.lib",
-                  "LLVMTarget.lib",
-                  "LLVMTransformUtils.lib",
-                  "LLVMScalarOpts.lib",
-                  "LLVMInstCombine.lib",
-                  "LLVMipo.lib"
-              )
-          }
-
-          # Guardar manifests como JSON
           $ClangManifest | ConvertTo-Json -Depth 10 | Out-File -FilePath "clang-manifest.json" -Encoding UTF8
-          $LldManifest | ConvertTo-Json -Depth 10 | Out-File -FilePath "lld-manifest.json" -Encoding UTF8
-          $LibrariesManifest | ConvertTo-Json -Depth 10 | Out-File -FilePath "libraries-manifest.json" -Encoding UTF8
 
       - name: Packaging Clang binaries
         shell: pwsh
         run: |
-          cd llvm-project\llvm\build\bin
-          
-          7z a -tzip clang-windows-x86_64.zip clang.exe clang++.exe
-          7z a -tzip lld-windows-x86_64.zip lld.exe ld.lld.exe lld-link.exe
-
-      - name: Packaging essential libraries
-        shell: pwsh
-        run: |
           cd llvm-project\llvm\build
-          New-Item -ItemType Directory -Path "essential_libs" -Force
           
-          Copy-Item "lib\LLVMCore.lib" "essential_libs\"
-          Copy-Item "lib\LLVMSupport.lib" "essential_libs\"
-          Copy-Item "lib\LLVMAnalysis.lib" "essential_libs\"
-          Copy-Item "lib\LLVMCodeGen.lib" "essential_libs\"
-          Copy-Item "lib\LLVMMC.lib" "essential_libs\"
-          Copy-Item "lib\LLVMTarget.lib" "essential_libs\"
-          Copy-Item "lib\LLVMTransformUtils.lib" "essential_libs\"
-          Copy-Item "lib\LLVMScalarOpts.lib" "essential_libs\"
-          Copy-Item "lib\LLVMInstCombine.lib" "essential_libs\"
-          Copy-Item "lib\LLVMipo.lib" "essential_libs\"
+          7z a -tzip clang-windows-x86_64.zip
+
+          cd llvm-project\llvm\dist
           
-          # Empaquetar librerías
-          7z a -tzip bin\clang-libraries-windows-x86_64.zip essential_libs\*
+          7z a -tzip libraries-windows-x86_64.zip lib
+          7z a -tzip runtimes-windows-x86_64.zip runtimes
 
       - name: Packaging includes
         shell: pwsh
@@ -240,11 +180,11 @@ jobs:
             
           files: |
             llvm-project/llvm/build/bin/clang-windows-x86_64.zip
-            llvm-project/llvm/build/bin/lld-windows-x86_64.zip
-            llvm-project/llvm/build/bin/clang-libraries-windows-x86_64.zip
+            
+            llvm-project/llvm/build/libraries-windows-x86_64.zip
+            llvm-project/llvm/build/runtimes-windows-x86_64.zip
             llvm-project/llvm/dist/includes-windows-x86_64.zip
+            
             llvm-project/llvm/build/bin/clang-manifest.json
-            llvm-project/llvm/build/bin/lld-manifest.json
-            llvm-project/llvm/build/bin/libraries-manifest.json
             
           draft: false
