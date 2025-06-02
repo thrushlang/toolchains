@@ -169,22 +169,9 @@ jobs:
       - name: Packaging Clang binaries
         shell: pwsh
         run: |
-          cd llvm-project\llvm\build
+          cd llvm-project\llvm
           
-          7z a -tzip clang-windows-x86_64.zip bin
-
-      - name: Packaging libraries (including compiler-rt)
-        shell: pwsh
-        run: |
-          cd llvm-project\llvm\build
-          
-          7z a -tzip libraries-windows-x86_64.zip lib
-
-      - name: Packaging includes
-        shell: pwsh
-        run: |
-          cd llvm-project\llvm\dist
-          7z a -tzip includes-windows-x86_64.zip include
+          7z a -tzip clang-windows-x86_64.zip build/bin build/lib dist/include
 
       - name: Releasing Clang (Windows)
         uses: softprops/action-gh-release@v2
@@ -198,7 +185,6 @@ jobs:
             
           files: |
             llvm-project/llvm/build/clang-windows-x86_64.zip
-            llvm-project/llvm/dist/libraries-windows-x86_64.zip
-            llvm-project/llvm/dist/includes-windows-x86_64.zip
+            llvm-project/llvm/build/bin/clang-manifest.json
             
           draft: false
