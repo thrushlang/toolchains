@@ -57,8 +57,8 @@ jobs:
                 -DCLANG_BUILD_TESTS=OFF \
                 -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE \
                 -DLLVM_ENABLE_LIBXML2=OFF \
-                -DLLVM_INCLUDE_UTILS=OFF \
-                -DLLVM_BUILD_UTILS=OFF \
+                -DLLVM_BUILD_UTILS=OFF \ 
+                -DLLVM_INCLUDE_TESTS=OFF \
                 -DCMAKE_INSTALL_PREFIX="../dist" \
                 -DCLANG_BUILD_TOOLS=OFF \
                 -DLLVM_INCLUDE_TOOLS=OFF \
