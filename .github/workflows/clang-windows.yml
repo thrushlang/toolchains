@@ -75,40 +75,41 @@ jobs:
         run: |
           cd llvm-project\llvm\build
           cmake ..\CMakeLists.txt -G Ninja `
-            -DLLVM_ENABLE_PROJECTS="clang;lld" `
-            -DLLVM_ENABLE_RUNTIMES="libc" `
-            -DLLVM_ENABLE_TERMINFO=OFF `
-            -DLLVM_ENABLE_ZLIB=OFF `
-            -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE `
-            -DLLVM_ENABLE_LIBXML2=OFF `
-            -DLLVM_INCLUDE_UTILS=OFF `
-            -DLLVM_INCLUDE_TOOLS=OFF `
-            -DLLVM_INCLUDE_UTILS=OFF ` 
-            -DCLANG_BUILD_TESTS=OFF `
-            -DCMAKE_INSTALL_PREFIX="..\dist" `
-            -DCMAKE_BUILD_TYPE=MinSizeRel `
-            -DLLVM_TARGETS_TO_BUILD="X86" `
-            -DLLVM_BUILD_TESTS=OFF `
-            -DLLVM_BUILD_EXAMPLES=OFF `
-            -DLLVM_BUILD_UTILS=OFF `
-            -DLLVM_BUILD_TOOLS=OFF `
-            -DCLANG_BUILD_TOOLS=OFF `
-            -DLLVM_INSTALL_BINUTILS_SYMLINKS=OFF `
-            -DLLVM_INCLUDE_EXAMPLES=OFF `
-            -DLLVM_INCLUDE_DOCS=OFF `
-            -DLLVM_ENABLE_ASSERTIONS=OFF `
-            -DLLVM_ENABLE_EXPENSIVE_CHECKS=OFF `
-            -DLLVM_ENABLE_DEBUG_RUNTIME=OFF `
-            -DLLVM_OPTIMIZED_TABLEGEN=ON `
-            -DLLVM_USE_SPLIT_DWARF=OFF `
-            -DCLANG_ENABLE_STATIC_ANALYZER=OFF `
-            -DCLANG_ENABLE_ARCMT=OFF `
-            -DCLANG_TOOL_SCAN_BUILD_BUILD=OFF `
-            -DCLANG_TOOL_SCAN_VIEW_BUILD=OFF `
-            -DCOMPILER_RT_BUILD_SANITIZERS=OFF `
-            -DCOMPILER_RT_BUILD_XRAY=OFF `
-            -DCOMPILER_RT_BUILD_LIBFUZZER=OFF `
-            -DCOMPILER_RT_BUILD_PROFILE=OFF
+          -DCMAKE_BUILD_TYPE=MinSizeRel `
+          -DCMAKE_INSTALL_PREFIX="..\dist" `
+          -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE `
+          `
+          -DLLVM_ENABLE_PROJECTS="clang;lld" `
+          -DLLVM_ENABLE_RUNTIMES="libc" `
+          -DLLVM_TARGETS_TO_BUILD="X86" `
+          -DLLVM_OPTIMIZED_TABLEGEN=ON `
+          -DLLVM_ENABLE_TERMINFO=OFF `
+          -DLLVM_ENABLE_ZLIB=OFF `
+          -DLLVM_ENABLE_LIBXML2=OFF `
+          -DLLVM_ENABLE_ASSERTIONS=OFF `
+          -DLLVM_ENABLE_EXPENSIVE_CHECKS=OFF `
+          -DLLVM_ENABLE_DEBUG_RUNTIME=OFF `
+          -DLLVM_USE_SPLIT_DWARF=OFF `
+          -DLLVM_BUILD_TOOLS=OFF `
+          -DLLVM_BUILD_UTILS=OFF `
+          -DLLVM_BUILD_TESTS=OFF `
+          -DLLVM_BUILD_EXAMPLES=OFF `
+          -DLLVM_INCLUDE_UTILS=OFF `
+          -DLLVM_INCLUDE_EXAMPLES=OFF `
+          -DLLVM_INCLUDE_DOCS=OFF `
+          -DLLVM_INSTALL_BINUTILS_SYMLINKS=OFF `
+          `
+          -DCLANG_BUILD_TOOLS=OFF `
+          -DCLANG_BUILD_TESTS=OFF `
+          -DCLANG_ENABLE_STATIC_ANALYZER=OFF `
+          -DCLANG_ENABLE_ARCMT=OFF `
+          -DCLANG_TOOL_SCAN_BUILD_BUILD=OFF `
+          -DCLANG_TOOL_SCAN_VIEW_BUILD=OFF `
+          `
+          -DCOMPILER_RT_BUILD_SANITIZERS=OFF `
+          -DCOMPILER_RT_BUILD_XRAY=OFF `
+          -DCOMPILER_RT_BUILD_LIBFUZZER=OFF `
+          -DCOMPILER_RT_BUILD_PROFILE=OFF
 
       - name: Building Clang and essential libraries
         shell: pwsh
