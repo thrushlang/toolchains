@@ -45,6 +45,7 @@ jobs:
         run: |
               cmake ../CMakeLists.txt -G Ninja \
                 -DLLVM_ENABLE_DOXYGEN=OFF \
+                -DCMAKE_BUILD_TYPE=MinSizeRel
                 -DCLANG_ENABLE_STATIC_ANALYZER=OFF \
                 -DCMAKE_C_COMPILER="clang" \
                 -DCMAKE_C_FLAGS="-Oz -ffunction-sections -fdata-sections -fno-unwind-tables -fno-asynchronous-unwind-tables" \
