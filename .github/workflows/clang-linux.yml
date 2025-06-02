@@ -83,7 +83,7 @@ jobs:
         working-directory: llvm-project/llvm/build
       - name: Building Clang
         run: |
-          ninja -j$(nproc) ld.lld clang
+          ninja -j$(nproc) lld clang
         working-directory: llvm-project/llvm/build
       - name: Optimizing Clang
         run: |
