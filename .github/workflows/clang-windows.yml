@@ -115,7 +115,6 @@ jobs:
         shell: pwsh
         run: |
           cd llvm-project\llvm\build
-          # Compilar solo Clang y LLD con las librerías mínimas necesarias
           ninja -j $env:NUMBER_OF_PROCESSORS clang lld libc
 
       - name: Installing Clang
@@ -156,7 +155,7 @@ jobs:
         run: |
           cd llvm-project\llvm\build
           
-          7z a -tzip clang-windows-x86_64.zip
+          7z a -tzip clang-windows-x86_64.zip bin
 
           cd llvm-project\llvm\dist
           
@@ -180,10 +179,10 @@ jobs:
             Optimized Clang compiler with essential libraries for Windows x86_64 environments.
             
           files: |
-            llvm-project/llvm/build/bin/clang-windows-x86_64.zip
+            llvm-project/llvm/build/clang-windows-x86_64.zip
             
             llvm-project/llvm/build/libraries-windows-x86_64.zip
-            llvm-project/llvm/build/runtimes-windows-x86_64.zip
+            llvm-project/llvm/dist/runtimes-windows-x86_64.zip
             llvm-project/llvm/dist/includes-windows-x86_64.zip
             
             llvm-project/llvm/build/bin/clang-manifest.json
