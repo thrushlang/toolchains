@@ -184,7 +184,7 @@ jobs:
             Clang compiler with essential libraries and compiler-rt runtime for Windows x86_64 environments.
             
           files: |
-            llvm-project/llvm/build/clang-windows-x86_64.zip
+            llvm-project/llvm/clang-windows-x86_64.zip
             llvm-project/llvm/build/bin/clang-manifest.json
             
           draft: false
