@@ -201,7 +201,7 @@ jobs:
           
           $ClangManifest | ConvertTo-Json -Depth 10 | Out-File -FilePath "clang-manifest.json" -Encoding UTF8
 
-      - name: Packaging Clang binaries (Maximum Compression)
+      - name: Packaging Clang binaries
         shell: pwsh
         run: |
           7z a -tzip -mx=9 clang-windows-x86_64.zip clang-package\*
