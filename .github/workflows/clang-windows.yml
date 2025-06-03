@@ -132,7 +132,7 @@ jobs:
       - name: Strip binaries to reduce size
         shell: pwsh
         run: |
-          cd llvm-project\llvm\dist\bin
+          cd llvm-project\llvm\build\bin
           Get-ChildItem -Filter "*.exe" | ForEach-Object {
               Write-Host "Processing: $($_.Name)"
               if (Test-Path "llvm-strip.exe") {
