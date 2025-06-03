@@ -129,12 +129,6 @@ jobs:
           cd llvm-project\llvm\build
           ninja -j $env:NUMBER_OF_PROCESSORS clang lld compiler-rt
 
-      - name: Installing Clang components
-        shell: pwsh
-        run: |
-          cd llvm-project\llvm\build
-          ninja install
-
       - name: Strip binaries to reduce size
         shell: pwsh
         run: |
@@ -164,13 +158,13 @@ jobs:
           } | Copy-Item -Destination "clang-package\lib\"
           
           # Copy essential headers (only clang headers, not all LLVM)
-          if (Test-Path "llvm-project\llvm\dist\include\clang") {
-              Copy-Item "llvm-project\llvm\dist\include\clang" -Destination "clang-package\include\" -Recurse -ErrorAction SilentlyContinue
+          if (Test-Path "llvm-project\llvm\build\include") {
+              Copy-Item "llvm-project\llvm\build\include\*" -Destination "clang-package\include\" -Recurse -ErrorAction SilentlyContinue
           }
           
           # Copy essential system headers
-          if (Test-Path "llvm-project\llvm\dist\lib\clang") {
-              Copy-Item "llvm-project\llvm\dist\lib\clang" -Destination "clang-package\lib\" -Recurse
+          if (Test-Path "llvm-project\llvm\build\lib") {
+              Copy-Item "llvm-project\llvm\build\lib\*" -Destination "clang-package\lib\" -Recurse -ErrorAction SilentlyContinue
           }
 
       - name: Creating manifests
