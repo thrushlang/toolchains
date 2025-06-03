@@ -223,21 +223,11 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.BUILD_ID }}
-          name: "Clang x86_64 (Windows) - Optimized"
+          name: "Clang x86_64 (Windows)"
           body: |
-            ## Clang x86_64 - Size Optimized Build
+            ## Clang x86_64
            
-            Minimal Clang compiler package with essential components:
-            - clang.exe (C/C++ compiler)
-            - lld.exe (LLVM linker)
-            - compiler-rt runtime libraries
-            - Essential headers and includes
-            
-            **Optimizations applied:**
-            - Stripped debug symbols
-            - Maximum compression
-            - Minimal runtime components only
-            - Size-optimized build flags
+            Clang x86_64 for Windows environments.
             
           files: |
             clang-windows-x86_64.zip
