@@ -204,7 +204,7 @@ jobs:
       - name: Packaging Clang binaries (Maximum Compression)
         shell: pwsh
         run: |
-          7z a -tzip -mx=9 -mfb=273 -md=32m -ms=on -mmt=on clang-windows-x86_64.zip clang-package\*
+          7z a -tzip -mx=9 clang-windows-x86_64.zip clang-package\*
 
       - name: Display package size
         shell: pwsh
