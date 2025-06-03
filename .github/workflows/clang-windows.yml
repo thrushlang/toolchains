@@ -154,7 +154,7 @@ jobs:
           New-Item -ItemType Directory -Path "clang-package\lib" -Force
           New-Item -ItemType Directory -Path "clang-package\include" -Force
           
-          Copy-Item "llvm-project\llvm\build\bin\clang.exe" -Destination "clang-package\bin\" -ErrorAction SilentlyContinue
+          Copy-Item "llvm-project\llvm\build\bin\clang.exe" -Destination "clang-package\bin\"
           Copy-Item "llvm-project\llvm\build\bin\lld.exe" -Destination "clang-package\bin\" -ErrorAction SilentlyContinue
           Copy-Item "llvm-project\llvm\build\bin\ld.lld.exe" -Destination "clang-package\bin\" -ErrorAction SilentlyContinue
           Copy-Item "llvm-project\llvm\build\bin\lld-link.exe" -Destination "clang-package\bin\" -ErrorAction SilentlyContinue
