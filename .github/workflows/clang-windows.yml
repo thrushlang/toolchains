@@ -154,20 +154,18 @@ jobs:
           New-Item -ItemType Directory -Path "clang-package\lib" -Force
           New-Item -ItemType Directory -Path "clang-package\include" -Force
           
-          Copy-Item "llvm-project\llvm\dist\bin\clang.exe" -Destination "clang-package\bin\"
-          Copy-Item "llvm-project\llvm\dist\bin\clang++.exe" -Destination "clang-package\bin\" -ErrorAction SilentlyContinue
-          Copy-Item "llvm-project\llvm\dist\bin\lld.exe" -Destination "clang-package\bin\" -ErrorAction SilentlyContinue
-          Copy-Item "llvm-project\llvm\dist\bin\ld.lld.exe" -Destination "clang-package\bin\" -ErrorAction SilentlyContinue
-          Copy-Item "llvm-project\llvm\dist\bin\lld-link.exe" -Destination "clang-package\bin\" -ErrorAction SilentlyContinue
+          Copy-Item "llvm-project\llvm\build\bin\clang.exe" -Destination "clang-package\bin\" -ErrorAction SilentlyContinue
+          Copy-Item "llvm-project\llvm\build\bin\lld.exe" -Destination "clang-package\bin\" -ErrorAction SilentlyContinue
+          Copy-Item "llvm-project\llvm\build\bin\ld.lld.exe" -Destination "clang-package\bin\" -ErrorAction SilentlyContinue
+          Copy-Item "llvm-project\llvm\build\bin\lld-link.exe" -Destination "clang-package\bin\" -ErrorAction SilentlyContinue
           
-          # Copy essential compiler-rt libraries
-          Get-ChildItem "llvm-project\llvm\dist\lib\*" -Include "*.lib", "*.a" | Where-Object {
+          Get-ChildItem "llvm-project\llvm\build\lib\*" -Include "*.lib", "*.a", "*.dll" | Where-Object {
               $_.Name -match "clang_rt" -and ($_.Name -match "builtins" -or $_.Name -match "crt")
           } | Copy-Item -Destination "clang-package\lib\"
           
           # Copy essential headers (only clang headers, not all LLVM)
           if (Test-Path "llvm-project\llvm\dist\include\clang") {
-              Copy-Item "llvm-project\llvm\dist\include\clang" -Destination "clang-package\include\" -Recurse
+              Copy-Item "llvm-project\llvm\dist\include\clang" -Destination "clang-package\include\" -Recurse -ErrorAction SilentlyContinue
           }
           
           # Copy essential system headers
