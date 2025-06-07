@@ -65,16 +65,10 @@ jobs:
           ninja install
         working-directory: llvm-project/llvm/build
 
-      - name: Packaging LLVM C API (LLVM C API Libraries, LLVM Linker Libraries)
+      - name: Packaging LLVM C API (LLVM C API Libraries, Binaries & Includes)
         run: |
-          tar --format=pax -cJf runtimes.tar.xz --exclude='*/*.cmake' --exclude='*/*.d' runtimes
-          tar --format=pax -cJf libraries.tar.xz --exclude='*/*.o' --exclude='*/*.cmake' --exclude='*/*.d' lib
-        working-directory: llvm-project/llvm/build
-
-      - name: Packaging LLVM C API (Includes)
-        run: |
-          tar --format=pax -cJf includes.tar.xz --exclude='*/*.o' --exclude='*/*.cmake' --exclude='*/*.d' include
-        working-directory: llvm-project/llvm/dist
+          tar --format=pax -cJf llvm-c-api-x86_64-linux.tar.xz --exclude='*/*.cmake' --exclude='*/*.d' build/lib build/bin dist/include
+        working-directory: llvm-project/llvm
 
       - name: Releasing LLVM C API
         uses: softprops/action-gh-release@v2
@@ -87,9 +81,6 @@ jobs:
             LLVM C API (v17.0.6) libraries for Linux x86_64 environments.
             
           files: |
-            llvm-project/llvm/build/bin/llvm-config
-            llvm-project/llvm/build/runtimes.tar.xz
-            llvm-project/llvm/build/libraries.tar.xz
-            llvm-project/llvm/dist/includes.tar.xz
+            llvm-project/llvm/llvm-c-api-x86_64-linux.tar.xz
             
           draft: false
