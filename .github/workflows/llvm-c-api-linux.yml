@@ -68,7 +68,6 @@ jobs:
       - name: Cleaning LLVM Binaries
         run: |
           find llvm-project/llvm/build/bin -type f -executable ! -name "llvm-config" -delete
-          echo "Removed all executable files except llvm-config from llvm-project/llvm/build/bin"
 
       - name: Packaging LLVM C API (LLVM C API Libraries, Binaries & Includes)
         run: |
