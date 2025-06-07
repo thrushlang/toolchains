@@ -72,11 +72,11 @@ jobs:
       - name: Cloning LLVM C API
         shell: bash
         run: |
-          mkdir -p tempDir/{lib,bin,includes}
+          mkdir -p tempDir/{lib,bin,include}
           
-          cp -r llvm-project/llvm/build/lib/ tempDir/lib
-          cp -r llvm-project/llvm/build/bin/ tempDir/bin
-          cp -r llvm-project/llvm/dist/includes/ tempDir/includes
+          cp -r llvm-project/llvm/build/lib/* tempDir/lib/
+          cp -r llvm-project/llvm/build/bin/* tempDir/bin/
+          cp -r llvm-project/llvm/dist/include/* tempDir/include/
 
       - name: Packaging LLVM C API (LLVM C API Libraries, Binaries & Includes)
         run: |
