@@ -65,9 +65,14 @@ jobs:
           ninja install
         working-directory: llvm-project/llvm/build
 
+      - name: Cleaning LLVM Binaries
+        run: |
+          find llvm-project/llvm/build/bin -type f -executable ! -name "llvm-config" -delete
+          echo "Removed all executable files except llvm-config from llvm-project/llvm/build/bin"
+
       - name: Packaging LLVM C API (LLVM C API Libraries, Binaries & Includes)
         run: |
-          tar --format=pax -cJf llvm-c-api-x86_64-linux.tar.xz --exclude='*/*.cmake' --exclude='*/*.d' build/lib build/bin dist/include
+          tar --format=pax -cJf llvm-c-api-x86_64-linux.tar.xz --exclude='*/*.cmake' --exclude='*/*.o' --exclude='*/*.d' build/lib build/bin dist/include
         working-directory: llvm-project/llvm
 
       - name: Releasing LLVM C API
