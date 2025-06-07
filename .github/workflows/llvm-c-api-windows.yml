@@ -101,6 +101,13 @@ jobs:
           cd llvm-project\llvm\build
           ninja install
 
+      - name: Cleaning LLVM Binaries
+        shell: pwsh
+        run: |
+          $binPath = "llvm-project\llvm\build\bin"
+          Get-ChildItem -Path $binPath -Filter "*.exe" | Where-Object { $_.Name -ne "llvm-config.exe" } | Remove-Item -Force
+          Write-Output "Removed all .exe files except llvm-config.exe from $binPath"
+
       - name: Packaging LLVM C API (LLVM C API Libraries, binaries & includes)
         shell: pwsh
         run: |
