@@ -106,7 +106,6 @@ jobs:
         run: |
           $binPath = "llvm-project\llvm\build\bin"
           Get-ChildItem -Path $binPath -Filter "*.exe" | Where-Object { $_.Name -ne "llvm-config.exe" } | Remove-Item -Force
-          Write-Output "Removed all .exe files except llvm-config.exe from $binPath"
 
       - name: Packaging LLVM C API (LLVM C API Libraries, binaries & includes)
         shell: pwsh
@@ -122,9 +121,9 @@ jobs:
           body: |
             ## LLVM C API
            
-            LLVM C API (v17.0.6) libraries for Windows x86_64 environments.
+            LLVM C API (v17.0.6) libraries for Windows x64 environments.
             
           files: |
-            llvm-project\llvm\llvm-c-api-x86_64-windows.zip
+            llvm-project\llvm\llvm-c-api-x64-windows.zip
             
           draft: false
