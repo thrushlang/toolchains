@@ -82,9 +82,9 @@ jobs:
           body: |
             ## LLVM C API
            
-            LLVM C API (v17.0.6) libraries for Linux x86_64 environments.
+            LLVM C API (v17.0.6) libraries for Linux x64 environments.
             
           files: |
-            llvm-project/llvm/llvm-c-api-x86_64-linux.tar.xz
+            llvm-project/llvm/llvm-c-api-x64-linux.tar.xz
             
           draft: false
