@@ -93,8 +93,6 @@ jobs:
         run: |
           cd llvm-project\llvm\build
 
-          ninja -j $env:NUMBER_OF_PROCESSORS libc
-          ninja -j $env:NUMBER_OF_PROCESSORS lldCOFF.lib lldCommon.lib lldELF.lib lldMachO.lib lldMinGW.lib lldWasm.lib
           ninja -j $env:NUMBER_OF_PROCESSORS LLVMAggressiveInstCombine.lib LLVMAnalysis.lib LLVMAsmParser.lib LLVMAsmPrinter.lib LLVMBinaryFormat.lib LLVMBitReader.lib LLVMBitWriter.lib LLVMBitstreamReader.lib LLVMCFGuard.lib LLVMCFIVerify.lib LLVMCodeGen.lib LLVMCodeGenTypes.lib LLVMCore.lib LLVMCoroutines.lib LLVMCoverage.lib LLVMDWARFLinker.lib LLVMDWARFLinkerParallel.lib LLVMDWP.lib LLVMDebugInfoBTF.lib LLVMDebugInfoCodeView.lib LLVMDebugInfoDWARF.lib LLVMDebugInfoGSYM.lib LLVMDebugInfoLogicalView.lib LLVMDebugInfoMSF.lib LLVMDebugInfoPDB.lib LLVMDebuginfod.lib LLVMDemangle.lib LLVMDiff.lib LLVMDlltoolDriver.lib LLVMExecutionEngine.lib LLVMExegesis.lib LLVMExegesisX86.lib LLVMExtensions.lib LLVMFileCheck.lib LLVMFrontendHLSL.lib LLVMFrontendOpenACC.lib LLVMFrontendOpenMP.lib LLVMFuzzMutate.lib LLVMFuzzerCLI.lib LLVMGlobalISel.lib LLVMIRPrinter.lib LLVMIRReader.lib LLVMInstCombine.lib LLVMInstrumentation.lib LLVMInterfaceStub.lib LLVMInterpreter.lib LLVMJITLink.lib LLVMLTO.lib LLVMLibDriver.lib LLVMLineEditor.lib LLVMLinker.lib LLVMMC.lib LLVMMCA.lib LLVMMCDisassembler.lib LLVMMCJIT.lib LLVMMCParser.lib LLVMMIRParser.lib LLVMObjCARCOpts.lib LLVMObjCopy.lib LLVMObject.lib LLVMObjectYAML.lib LLVMOption.lib LLVMOrcJIT.lib LLVMOrcShared.lib LLVMOrcTargetProcess.lib LLVMPasses.lib LLVMProfileData.lib LLVMRemarks.lib LLVMRuntimeDyld.lib LLVMScalarOpts.lib LLVMSelectionDAG.lib LLVMSupport.lib LLVMSymbolize.lib LLVMTableGen.lib LLVMTableGenCommon.lib LLVMTableGenGlobalISel.lib LLVMTarget.lib LLVMTargetParser.lib LLVMTextAPI.lib LLVMTransformUtils.lib LLVMVectorize.lib LLVMWindowsDriver.lib LLVMWindowsManifest.lib LLVMX86AsmParser.lib LLVMX86CodeGen.lib LLVMX86Desc.lib LLVMX86Disassembler.lib LLVMX86Info.lib LLVMX86TargetMCA.lib LLVMXRay.lib LLVMipo.lib
           ninja -j $env:NUMBER_OF_PROCESSORS LTO.dll llvm-config
 
@@ -104,19 +102,12 @@ jobs:
           cd llvm-project\llvm\build
           ninja install
 
-      - name: Packaging LLVM C API (LLVM C API Libraries & LLVM Linker Libraries)
+      - name: Packaging LLVM C API (LLVM C API Libraries, binaries & includes)
         shell: pwsh
         run: |
-          cd llvm-project\llvm\build
-          7z a -tzip libraries.zip lib
-          7z a -tzip runtimes.zip runtimes
+          cd llvm-project\llvm
+          7z a -tzip llvm-c-api-x86_64-windows.zip build/lib build/bin dist/includes
         
-      - name: Packaging LLVM C API (Includes)
-        shell: pwsh
-        run: |
-          cd llvm-project\llvm\dist
-          7z a -tzip includes.zip include
-
       - name: Releasing LLVM C API
         uses: softprops/action-gh-release@v2
         with:
@@ -128,9 +119,6 @@ jobs:
             LLVM C API (v17.0.6) libraries for Windows x86_64 environments.
             
           files: |
-            llvm-project/llvm/build/bin/llvm-config.exe
-            llvm-project/llvm/build/runtimes.zip
-            llvm-project/llvm/build/libraries.zip
-            llvm-project/llvm/dist/includes.zip
+            llvm-project\llvm\llvm-c-api-x86_64-windows.zip
             
           draft: false
