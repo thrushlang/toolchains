@@ -73,7 +73,7 @@ jobs:
           cd llvm-project\llvm\build
           cmake ..\CMakeLists.txt -G Ninja `
             -DLLVM_ENABLE_RUNTIMES="libc" `
-            -DLLVM_ENABLE_PROJECTS="llvm;lld" `
+            -DLLVM_ENABLE_PROJECTS="llvm" `
             -DLLVM_ENABLE_TERMINFO=OFF `
             -DLLVM_ENABLE_ZLIB=OFF `
             -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE `
