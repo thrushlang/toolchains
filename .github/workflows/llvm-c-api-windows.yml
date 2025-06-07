@@ -114,17 +114,17 @@ jobs:
           
           New-Item -ItemType Directory -Path "tempDir\lib" -Force
           New-Item -ItemType Directory -Path "tempDir\bin" -Force
-          New-Item -ItemType Directory -Path "tempDir\includes" -Force
+          New-Item -ItemType Directory -Path "tempDir\include" -Force
           
           Copy-Item -Path "llvm-project\llvm\build\lib\*" -Destination "tempDir\lib\" -Recurse -Force
           Copy-Item -Path "llvm-project\llvm\build\bin\*" -Destination "tempDir\bin\" -Recurse -Force
-          Copy-Item -Path "llvm-project\llvm\dist\includes\*" -Destination "tempDir\includes\" -Recurse -Force
+          Copy-Item -Path "llvm-project\llvm\dist\include\*" -Destination "tempDir\include\" -Recurse -Force
 
       - name: Packaging LLVM C API (LLVM C API Libraries, binaries & includes)
         shell: pwsh
         run: |
           cd tempDir
-          7z a -tzip llvm-c-api-x64-windows.zip lib bin includes
+          7z a -tzip llvm-c-api-x64-windows.zip lib bin include
         
       - name: Releasing LLVM C API
         uses: softprops/action-gh-release@v2
