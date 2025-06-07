@@ -107,7 +107,7 @@ jobs:
           $binPath = "llvm-project\llvm\build\bin"
           Get-ChildItem -Path $binPath -Filter "*.exe" | Where-Object { $_.Name -ne "llvm-config.exe" } | Remove-Item -Force
 
-      - name: Packaging LLVM C API (Flat structure)
+      - name: Packaging LLVM C API
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Path "tempDir" -Force
