@@ -80,7 +80,7 @@ jobs:
             -DLLVM_INCLUDE_UTILS=OFF `
             -DCMAKE_INSTALL_PREFIX="..\dist" `
             -DCMAKE_BUILD_TYPE=MinSizeRel `
-            -DLLVM_TARGETS_TO_BUILD=all
+            -DLLVM_TARGETS_TO_BUILD=all `
             -DLLVM_BUILD_TESTS=OFF `
             -DLLVM_BUILD_EXAMPLES=OFF `
             -DLLVM_INCLUDE_TESTS=OFF `
