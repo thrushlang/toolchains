@@ -92,7 +92,7 @@ jobs:
         run: |
           cd llvm-project\llvm\build
 
-          ninja -j $env:NUMBER_OF_PROCESSORS llvm
+          ninja -j $env:NUMBER_OF_PROCESSORS
 
       - name: Installing LLVM C API
         shell: pwsh
