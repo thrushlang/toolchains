@@ -6,9 +6,33 @@ This repository contains a pre-compiled version of the LLVM C API for building T
 
 - VERSION: **v17.0.6** 
 - OPERATING SYSTEMS: Windows (x86_64) & Linux (x86_64)
-- AVAILABLE ARCHITECTURE TARGETS: x86_64
+
+### LLVM C API - AVAILABLE TARGETS
+
+- ``x86_64``
+- ``AArch64``
+- ``RISC-V``
+- ``ARM``
+- ``MIPS``
+- ``PowerPC``
+- ``SystemZ``
+- ``AMDGPU``
+- ``Hexagon``
+- ``Lanai``
+- ``LoongArch``
+- ``MSP430``
+- ``NVPTX``
+- ``SPARC``
+- ``XCore``
+- ``BPF``
+- ``SPIR-V``
+- ``WebAssembly``
 
 ## Clang
 
 - VERSION: **v17.0.6** 
 - OPERATING SYSTEMS: Windows (x86_64) & Linux (x86_64)
+
+### Clang - AVAILABLE TARGETS
+
+- ``x86_64``
