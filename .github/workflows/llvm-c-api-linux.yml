@@ -56,7 +56,7 @@ jobs:
 
       - name: Building LLVM C API
         run: |
-          ninja -j$(nproc) llvm
+          ninja -j$(nproc)
         working-directory: llvm-project/llvm/build
 
       - name: Installing LLVM C API
