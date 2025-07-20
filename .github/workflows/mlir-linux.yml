@@ -59,11 +59,6 @@ jobs:
           ninja -j$(nproc)
         working-directory: llvm-project/llvm/build
 
-      - name: Installing MLIR
-        run: |
-          ninja install
-        working-directory: llvm-project/llvm/build
-
       - name: Cloning MLIR
         shell: bash
         run: |
@@ -73,7 +68,7 @@ jobs:
 
       - name: Packaging LLVM C API (LLVM C API Libraries, Binaries & Includes)
         run: |
-          tar --format=pax -cJf mlir-x64-linux.tar.xz --exclude='*/*.cmake' --exclude='*/*.inc' --exclude='*/*.o' --exclude='*/*.d' bin
+          tar --format=pax -cJf mlir-x64-linux.tar.xz bin/mlir-opt bin/mlir-translate
         working-directory: tempDir
 
       - name: Releasing MLIR
