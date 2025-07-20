@@ -75,7 +75,7 @@ jobs:
 
       - name: Packaging LLVM C API (LLVM C API Libraries, Binaries & Includes)
         run: |
-          tar --format=pax -cJf mlir-x64-linux.tar.xz --exclude='*/*.cmake' --exclude='*/*.o' --exclude='*/*.d' lib bin include
+          tar --format=pax -cJf mlir-x64-linux.tar.xz --exclude='*/*.cmake' --exclude='*/*.inc' --exclude='*/*.o' --exclude='*/*.d' lib bin include
         working-directory: tempDir
 
       - name: Releasing MLIR
