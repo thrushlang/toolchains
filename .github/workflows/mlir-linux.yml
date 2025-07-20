@@ -69,13 +69,11 @@ jobs:
         run: |
           mkdir -p tempDir/{lib,bin,include}
           
-          cp -r llvm-project/llvm/build/lib/* tempDir/lib/
           cp -r llvm-project/llvm/build/bin/* tempDir/bin/
-          cp -r llvm-project/llvm/dist/include/* tempDir/include/
 
       - name: Packaging LLVM C API (LLVM C API Libraries, Binaries & Includes)
         run: |
-          tar --format=pax -cJf mlir-x64-linux.tar.xz --exclude='*/*.cmake' --exclude='*/*.inc' --exclude='*/*.o' --exclude='*/*.d' lib bin include
+          tar --format=pax -cJf mlir-x64-linux.tar.xz --exclude='*/*.cmake' --exclude='*/*.inc' --exclude='*/*.o' --exclude='*/*.d' bin
         working-directory: tempDir
 
       - name: Releasing MLIR
