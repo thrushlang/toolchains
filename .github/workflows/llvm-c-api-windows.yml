@@ -50,15 +50,10 @@ jobs:
         run: |
           Invoke-WebRequest -Uri "https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/llvm-project-17.0.6.src.tar.xz" -OutFile "llvm-project-17.0.6.src.tar.xz"
 
-      - name: Install 7zip
-        shell: pwsh
-        run: |
-          choco install libarchive -y
-
       - name: Unpacking LLVM project
         shell: pwsh
         run: |
-          bsdtar -xJf llvm-project-17.0.6.src.tar.xz
+          tar -xJf llvm-project-17.0.6.src.tar.xz --no-same-owner --no-same-permissions
           Rename-Item -Path "llvm-project-17.0.6.src" -NewName "llvm-project"
 
       - name: Preparing for build (LLVM-C API)
