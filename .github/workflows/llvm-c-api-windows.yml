@@ -58,7 +58,7 @@ jobs:
       - name: Unpacking LLVM project
         shell: pwsh
         run: |
-          7z x llvm-project-18.1.8.src.tar.xz -so | 7z x -si -ttar
+          7z x llvm-project-18.1.8.src.tar.xz -so | 7z x -si -ttar -snld
           Rename-Item -Path "llvm-project-18.1.8.src" -NewName "llvm-project"
 
       - name: Preparing for build (LLVM-C API)
