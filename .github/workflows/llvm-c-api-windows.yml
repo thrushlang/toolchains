@@ -48,12 +48,12 @@ jobs:
       - name: Downloading LLVM project
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri "https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/llvm-project-17.0.6.src.tar.xz" -OutFile "llvm-project-17.0.6.src.tar.xz"
+          Invoke-WebRequest -Uri "https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-17.0.6.zip" -OutFile "llvm-project-17.0.6.src.zip"
 
       - name: Unpacking LLVM project
         shell: pwsh
         run: |
-          tar -xJf llvm-project-17.0.6.src.tar.xz --no-same-owner --no-same-permissions
+          Expand-Archive -Path llvm-project-17.0.6.src.zip -DestinationPath .
           Rename-Item -Path "llvm-project-17.0.6.src" -NewName "llvm-project"
 
       - name: Preparing for build (LLVM-C API)
