@@ -45,6 +45,11 @@ jobs:
       - name: Install CMake
         uses: lukka/get-cmake@latest
 
+      - name: Install 7zip
+        shell: pwsh
+        run: |
+          choco install 7zip -y
+
       - name: Downloading LLVM project
         shell: pwsh
         run: |
