@@ -53,8 +53,8 @@ jobs:
       - name: Downloading LLVM project
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri "https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-17.0.6.zip" -OutFile "llvm-project-17.0.6.src.zip"
-
+          Invoke-WebRequest -Uri "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/llvm-project-18.1.8.src.tar.xz" -OutFile "llvm-project-18.1.8.src.tar.xz"
+      
       - name: Unpacking LLVM project
         shell: pwsh
         run: |
