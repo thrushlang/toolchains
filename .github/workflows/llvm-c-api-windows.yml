@@ -45,21 +45,21 @@ jobs:
       - name: Install CMake
         uses: lukka/get-cmake@latest
 
-      - name: Install 7zip
-        shell: pwsh
-        run: |
-          choco install 7zip -y
-
       - name: Downloading LLVM project
         shell: pwsh
         run: |
           Invoke-WebRequest -Uri "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/llvm-project-18.1.8.src.tar.xz" -OutFile "llvm-project-18.1.8.src.tar.xz"
       
+      - name: Install 7zip
+        shell: pwsh
+        run: |
+          choco install 7zip -y
+
       - name: Unpacking LLVM project
         shell: pwsh
         run: |
-          Expand-Archive -Path llvm-project-17.0.6.src.zip -DestinationPath .
-          Rename-Item -Path "llvm-project-17.0.6.src" -NewName "llvm-project"
+          7z x llvm-project-18.1.8.src.tar.xz -so | 7z x -si -ttar
+          Rename-Item -Path "llvm-project-18.1.8.src" -NewName "llvm-project"
 
       - name: Preparing for build (LLVM-C API)
         shell: pwsh
