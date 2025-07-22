@@ -59,6 +59,11 @@ jobs:
           ninja -j$(nproc)
         working-directory: llvm-project/llvm/build
 
+      - name: Installing LLVM C API
+        run: |
+          ninja install
+        working-directory: llvm-project/llvm/build
+
       - name: Cleaning LLVM Binaries
         run: |
           find llvm-project/llvm/build/bin -type f -executable ! -name "llvm-config" -delete
@@ -70,7 +75,7 @@ jobs:
           
           cp -r llvm-project/llvm/build/lib/* tempDir/lib/
           cp -r llvm-project/llvm/build/bin/* tempDir/bin/
-          cp -r llvm-project/llvm/build/include/* tempDir/include/
+          cp -r llvm-project/llvm/dist/include/* tempDir/include/
 
       - name: Packaging LLVM C API (LLVM C API Libraries, Binaries & Includes)
         run: |
