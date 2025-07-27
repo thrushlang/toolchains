@@ -4,7 +4,7 @@ on:
     tags:
       - 'CLANG-LINUX-v*.*.*'
 jobs:
-  build-clang:
+  build-clang-linux:
     runs-on: ubuntu-22.04
     permissions:
       contents: write
