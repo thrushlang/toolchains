@@ -6,7 +6,7 @@ on:
       - 'CLANG-WINDOWS-v*.*.*'
 
 jobs:
-  build-clang:
+  build-clang-windows:
     runs-on: windows-2022
 
     permissions:
