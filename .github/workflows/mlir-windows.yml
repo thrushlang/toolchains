@@ -1,0 +1,128 @@
+name: MLIR (Windows)
+
+on:
+  push:
+    tags:
+      - 'MLIR-WINDOWS-v*.*.*'
+
+jobs:
+  build-mlir-windows:
+    runs-on: windows-2022
+
+    permissions:
+      contents: write
+  
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
+    steps:
+      - name: Generating Unique ID
+        shell: pwsh
+        run: |
+          $BASE_NAME = "${{ github.ref }}".Replace('refs/tags/', '')
+          $BUILD_ID = "${BASE_NAME}"
+          
+          echo "BUILD_ID=$BUILD_ID" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "BASE_NAME=$BASE_NAME" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+          echo "Unique ID: $BUILD_ID"
+          echo "Base name: $BASE_NAME"
+    
+      - name: Set up build environment
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Ninja
+        shell: pwsh
+        run: |
+          pip install ninja
+          ninja --version
+
+      - name: Install CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Downloading LLVM project
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/llvm-project-18.1.8.src.tar.xz" -OutFile "llvm-project-18.1.8.src.tar.xz"
+      
+      - name: Install 7zip
+        shell: pwsh
+        run: |
+          choco install 7zip -y
+
+      - name: Unpacking LLVM project
+        shell: pwsh
+        run: |
+          7z x llvm-project-18.1.8.src.tar.xz -so | 7z x -si -ttar -snld
+          Rename-Item -Path "llvm-project-18.1.8.src" -NewName "llvm-project"
+
+      - name: Preparing for build MLIR (Windows)
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path "llvm-project\llvm\build" -Force
+          New-Item -ItemType Directory -Path "llvm-project\llvm\dist" -Force
+        
+      - name: Configuring CMake
+        shell: pwsh
+        run: |
+          cd llvm-project\llvm\build
+          cmake ..\CMakeLists.txt -G Ninja `
+            -DLLVM_ENABLE_PROJECTS="mlir" `
+            -DCMAKE_C_COMPILER_TARGET=x86_64-pc-windows-msvc `
+            -DCMAKE_CXX_COMPILER_TARGET=x86_64-pc-windows-msvc `
+            -DCMAKE_CXX_FLAGS="-Os" `
+            -DCMAKE_C_FLAGS="-Os" `
+            -DCMAKE_EXE_LINKER_FLAGS="/OPT:REF /OPT:ICF" `
+            -DLLVM_ENABLE_TERMINFO=OFF `
+            -DLLVM_ENABLE_ZLIB=OFF `
+            -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE `
+            -DLLVM_ENABLE_LIBXML2=0 `
+            -DLLVM_INCLUDE_UTILS=OFF `
+            -DCMAKE_INSTALL_PREFIX="..\dist" `
+            -DCMAKE_BUILD_TYPE=MinSizeRel `
+            -DLLVM_TARGETS_TO_BUILD="X86" `
+            -DLLVM_BUILD_TESTS=OFF `
+            -DLLVM_BUILD_EXAMPLES=OFF `
+            -DLLVM_INCLUDE_TESTS=OFF `
+            -DLLVM_INCLUDE_EXAMPLES=OFF `
+            -DLLVM_INCLUDE_DOCS=OFF
+
+      - name: Building MLIR
+        shell: pwsh
+        run: |
+          cd llvm-project\llvm\build
+          ninja -j $env:NUMBER_OF_PROCESSORS
+
+      - name: Packaging MLIR
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path "tempDir" -Force  
+          New-Item -ItemType Directory -Path "tempDir\mlir" -Force
+        
+          Copy-Item -Path "llvm-project\llvm\build\bin\*" -Destination "tempDir\mlir\" -Recurse -Force
+
+      - name: Packaging MLIR
+        shell: pwsh
+        run: |
+          cd tempDir
+          7z a -tzip mlir-x64-windows.zip mlir
+        
+      - name: Releasing MLIR
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.BUILD_ID }}
+          name: "MLIR (Windows)"
+          body: |
+            ## MLIR Multi-Level IR Compiler Framework
+           
+            MLIR (v17.0.6) libraries for Windows x64 environments.
+            
+          files: |
+            tempDir/mlir-x64-windows.zip
+            
+          draft: false
