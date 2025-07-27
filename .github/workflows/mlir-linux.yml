@@ -6,7 +6,7 @@ on:
       - 'MLIR-LINUX-v*.*.*'
 
 jobs:
-  build-llvm:
+  build-mlir-linux:
     runs-on: ubuntu-latest
 
     permissions:
