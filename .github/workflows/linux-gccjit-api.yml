@@ -1,0 +1,106 @@
+name: GCC JIT API
+
+on:
+  push:
+    tags:
+      - 'GCCJIT-LINUX-v*.*.*'
+
+jobs:
+  build-gccjit:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+  
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+  
+    steps:
+      - name: Generating Unique ID
+        run: |
+          BASE_NAME=$(echo "$GITHUB_REF" | sed 's|^refs/tags/||')
+          BUILD_ID="${BASE_NAME}-${GITHUB_RUN_ID}" 
+          
+          echo "BUILD_ID=$BUILD_ID" >> $GITHUB_ENV
+          echo "Unique ID: $BUILD_ID"
+    
+      - name: Downloading GCC source
+        run: |
+          wget https://gcc.gnu.org/pub/gcc/releases/gcc-12.3.0/gcc-12.3.0.tar.xz
+          tar -xf gcc-12.3.0.tar.xz
+          mv gcc-12.3.0 gcc-source
+
+      - name: Installing dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential flex bison libgmp-dev libmpfr-dev libmpc-dev zlib1g-dev texinfo
+          sudo apt-get remove -y gcc-12 g++-12
+
+      - name: Preparing build directory
+        run: |
+          mkdir build
+          mkdir dist
+          cd build
+        working-directory: gcc-source
+
+      - name: Configuring GCC with libgccjit (static)
+        run: |
+          ../configure \
+            --enable-host-shared \
+            --enable-languages=jit \
+            --enable-checking=release \
+            --disable-bootstrap \
+            --disable-multilib \
+            --prefix=$(pwd)/../dist \
+            --enable-static \
+            --disable-shared
+        working-directory: gcc-source/build
+
+      - name: Building libgccjit
+        run: |
+          make -j$(nproc)
+        working-directory: gcc-source/build
+
+      - name: Installing libgccjit
+        run: |
+          make install
+        working-directory: gcc-source/build
+
+      - name: Cleaning unnecessary binaries
+        run: |
+          find dist/bin -type f -executable ! -name "gccjit" -delete
+
+      - name: Collecting libgccjit artifacts
+        shell: bash
+        run: |
+          mkdir -p tempDir/{lib,bin,include}
+          
+          cp -r dist/lib/libgccjit.a tempDir/lib/
+          cp -r dist/lib/gcc/* tempDir/lib/ || true
+          cp -r dist/bin/* tempDir/bin/ || true
+          cp -r dist/include/* tempDir/include/ || true
+
+      - name: Packaging libgccjit (static libraries, binaries & includes)
+        run: |
+          tar --format=pax -cJf libgccjit-x64-linux.tar.xz \
+            --exclude='*/*.cmake' \
+            --exclude='*/*.inc' \
+            --exclude='*/*.o' \
+            --exclude='*/*.d' \
+            lib bin include
+        working-directory: tempDir
+
+      - name: Releasing libgccjit
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.BUILD_ID }}
+          name: "libgccjit (Linux)"
+          body: |
+            ## libgccjit Build
+            
+            libgccjit (v12.3.0) libraries for Linux x64 environments.
+            
+          files: |
+            tempDir/libgccjit-x64-linux.tar.xz
+            
+          draft: false
