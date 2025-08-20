@@ -45,6 +45,7 @@ jobs:
       - name: Configuring GCC with libgccjit (static)
         run: |
           ../configure \
+            --enable-host-shared \
             --enable-languages=jit \
             --enable-checking=release \
             --disable-bootstrap \
@@ -58,6 +59,7 @@ jobs:
             --disable-libatomic \
             --disable-libcc1 \
             --with-pic
+            
         working-directory: gcc-source/build
 
       - name: Building libgccjit
