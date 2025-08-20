@@ -1,4 +1,4 @@
-name: GCC JIT API
+name: GCCJIT API (Linux)
 
 on:
   push:
@@ -38,22 +38,26 @@ jobs:
 
       - name: Preparing build directory
         run: |
-          mkdir build
-          mkdir dist
+          mkdir -p build dist
           cd build
         working-directory: gcc-source
 
       - name: Configuring GCC with libgccjit (static)
         run: |
           ../configure \
-            --enable-host-shared \
             --enable-languages=jit \
             --enable-checking=release \
             --disable-bootstrap \
             --disable-multilib \
             --prefix=$(pwd)/../dist \
             --enable-static \
-            --disable-shared
+            --disable-shared \
+            --disable-libssp \
+            --disable-libgomp \
+            --disable-libquadmath \
+            --disable-libatomic \
+            --disable-libcc1 \
+            --with-pic
         working-directory: gcc-source/build
 
       - name: Building libgccjit
@@ -68,42 +72,46 @@ jobs:
 
       - name: Cleaning unnecessary binaries
         run: |
-          find dist/bin -type f -executable ! -name "gccjit" -delete
+          if [ -d ../dist/bin ]; then
+            find ../dist/bin -type f -executable -delete
+          else
+            echo "No bin directory found, skipping cleanup."
+          fi
         working-directory: gcc-source/build
 
       - name: Collecting libgccjit artifacts
         shell: bash
         run: |
           mkdir -p tempDir/{lib,bin,include}
+          cp -r ../dist/lib/libgccjit.a tempDir/lib/ || true
+          cp -r ../dist/lib/gcc/* tempDir/lib/ || true
+          cp -r ../dist/include/* tempDir/include/ || true
           
-          cp -r dist/lib/libgccjit.a tempDir/lib/
-          cp -r dist/lib/gcc/* tempDir/lib/ || true
-          cp -r dist/bin/* tempDir/bin/ || true
-          cp -r dist/include/* tempDir/include/ || true
-        
         working-directory: gcc-source
 
-      - name: Packaging libgccjit (static libraries, binaries & includes)
+      - name: Packaging libgccjit (static libraries & includes)
         run: |
           tar --format=pax -cJf libgccjit-x64-linux.tar.xz \
             --exclude='*/*.cmake' \
             --exclude='*/*.inc' \
             --exclude='*/*.o' \
             --exclude='*/*.d' \
-            lib bin include
+            --exclude='*.so*' \
+            lib include
+
         working-directory: gcc-source/tempDir
 
       - name: Releasing libgccjit
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.BUILD_ID }}
-          name: "libgccjit (Linux)"
+          name: "libgccjit Static (Linux)"
           body: |
-            ## libgccjit Build
+            ## libgccjit Static Build
             
             libgccjit (v12.3.0) libraries for Linux x64 environments.
             
           files: |
             gcc-source/tempDir/libgccjit-x64-linux.tar.xz
-            
+
           draft: false
