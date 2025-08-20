@@ -72,15 +72,6 @@ jobs:
           make install
         working-directory: gcc-source/build
 
-      - name: Cleaning unnecessary binaries
-        run: |
-          if [ -d ../dist/bin ]; then
-            find ../dist/bin -type f -executable -delete
-          else
-            echo "No bin directory found, skipping cleanup."
-          fi
-        working-directory: gcc-source/build
-
       - name: Collecting libgccjit artifacts
         shell: bash
         run: |
