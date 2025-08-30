@@ -47,11 +47,24 @@ jobs:
           mkdir build
           mkdir dist
           cd build
+          
         working-directory: llvm-project/llvm
 
       - name: Configuring CMake (LLVM C API)
         run: |
-          cmake ../CMakeLists.txt -G Ninja -DCMAKE_C_COMPILER="gcc" -DCMAKE_CXX_COMPILER="g++" -DLLVM_ENABLE_PROJECTS="mlir" -DLLVM_ENABLE_TERMINFO=OFF -DLLVM_ENABLE_ZLIB=OFF -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE -DLLVM_ENABLE_LIBXML2=0 -DCMAKE_INSTALL_PREFIX="../dist" -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_TARGETS_TO_BUILD=all
+          cmake ../CMakeLists.txt \
+          -G Ninja \
+          -DCMAKE_C_COMPILER="gcc" \
+          -DCMAKE_CXX_COMPILER="g++" \
+          -DLLVM_ENABLE_PROJECTS="mlir" \
+          -DLLVM_ENABLE_TERMINFO=OFF \
+          -DLLVM_ENABLE_ZLIB=OFF \
+          -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE \
+          -DLLVM_ENABLE_LIBXML2=0 \
+          -DCMAKE_INSTALL_PREFIX="../dist" \
+          -DCMAKE_BUILD_TYPE=MinSizeRel \
+          -DLLVM_TARGETS_TO_BUILD=all
+        
         working-directory: llvm-project/llvm/build
 
       - name: Building LLVM C API
@@ -75,6 +88,7 @@ jobs:
       - name: Packaging LLVM C API (LLVM C API Libraries, Binaries & Includes)
         run: |
           tar --format=pax -cJf mlir-c-api-x64-linux.tar.xz --exclude='*/*.cmake' --exclude='*/*.o' --exclude='*/*.d' lib bin include
+          
         working-directory: tempDir
 
       - name: Releasing LLVM C API
