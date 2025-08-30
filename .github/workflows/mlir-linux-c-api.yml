@@ -42,6 +42,7 @@ jobs:
 
       - name: Preparing for build (MLIR-C API)
         run: |
+          cd mlir
           mkdir build
           mkdir dist
           cd build
@@ -77,16 +78,16 @@ jobs:
 
       - name: Cleaning MLIR Binaries
         run: |
-          find llvm-project/llvm/build/bin -type f -executable ! -name "llvm-config" -delete
+          find llvm-project/llvm/mlir/build/bin -type f -executable ! -name "llvm-config" -delete
 
       - name: Cloning MLIR C API
         shell: bash
         run: |
           mkdir -p tempDir/{lib,bin,include}
           
-          cp -r llvm-project/llvm/dist/lib/* tempDir/lib/
-          cp -r llvm-project/llvm/dist/bin/* tempDir/bin/
-          cp -r llvm-project/llvm/dist/include/* tempDir/include/
+          cp -r llvm-project/llvm/mlir/dist/lib/* tempDir/lib/
+          cp -r llvm-project/llvm/mlir/dist/bin/* tempDir/bin/
+          cp -r llvm-project/llvm/mlir/dist/include/* tempDir/include/
 
       - name: Packaging MLIR C API (MLIR C API Libraries, Binaries & Includes)
         run: |
