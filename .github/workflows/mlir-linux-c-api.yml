@@ -46,7 +46,7 @@ jobs:
           mkdir dist
           cd build
           
-        working-directory: llvm-project/mlir
+        working-directory: llvm-project/llvm
 
       - name: Configuring CMake (MLIR C API)
         run: |
@@ -63,30 +63,30 @@ jobs:
           -DCMAKE_BUILD_TYPE=MinSizeRel \
           -DLLVM_TARGETS_TO_BUILD="Native" 
         
-        working-directory: llvm-project/mlir/build
+        working-directory: llvm-project/llvm/build
 
       - name: Building MLIR C API
         run: |
           ninja -j$(nproc)
-        working-directory: llvm-project/mlir/build
+        working-directory: llvm-project/llvm/build
 
       - name: Installing MLIR C API
         run: |
           ninja -j$(nproc)
-        working-directory: llvm-project/mlir/build
+        working-directory: llvm-project/llvm/build
 
       - name: Cleaning MLIR Binaries
         run: |
-          find llvm-project/mlir/build/bin -type f -executable ! -name "llvm-config" -delete
+          find llvm-project/llvm/dist/bin -type f -executable ! -name "llvm-config" -delete
 
       - name: Cloning MLIR C API
         shell: bash
         run: |
           mkdir -p tempDir/{lib,bin,include}
           
-          cp -r llvm-project/llvm/mlir/dist/lib/* tempDir/lib/
-          cp -r llvm-project/llvm/mlir/dist/bin/* tempDir/bin/
-          cp -r llvm-project/llvm/mlir/dist/include/* tempDir/include/
+          cp -r llvm-project/llvm/dist/lib/* tempDir/lib/
+          cp -r llvm-project/llvm/dist/bin/* tempDir/bin/
+          cp -r llvm-project/llvm/dist/include/* tempDir/include/
 
       - name: Packaging MLIR C API (MLIR C API Libraries, Binaries & Includes)
         run: |
