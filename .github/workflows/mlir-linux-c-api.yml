@@ -42,7 +42,7 @@ jobs:
           sudo apt-get remove -y llvm-16* clang-16*
           sudo rm -rf /usr/lib/llvm-16
 
-      - name: Preparing for build (LLVM-C API)
+      - name: Preparing for build (MLIR-C API)
         run: |
           mkdir build
           mkdir dist
@@ -50,7 +50,7 @@ jobs:
           
         working-directory: llvm-project/llvm
 
-      - name: Configuring CMake (LLVM C API)
+      - name: Configuring CMake (MLIR C API)
         run: |
           cmake ../CMakeLists.txt \
           -G Ninja \
@@ -67,16 +67,16 @@ jobs:
         
         working-directory: llvm-project/llvm/build
 
-      - name: Building LLVM C API
+      - name: Building MLIR C API
         run: |
-          ninja -j$(nproc)
+          ninja mlir -j$(nproc)
         working-directory: llvm-project/llvm/build
 
-      - name: Cleaning LLVM Binaries
+      - name: Cleaning MLIR Binaries
         run: |
           find llvm-project/llvm/build/bin -type f -executable ! -name "llvm-config" -delete
 
-      - name: Cloning LLVM C API
+      - name: Cloning MLIR C API
         shell: bash
         run: |
           mkdir -p tempDir/{lib,bin,include}
@@ -85,13 +85,13 @@ jobs:
           cp -r llvm-project/llvm/build/bin/* tempDir/bin/
           cp -r llvm-project/llvm/build/include/* tempDir/include/
 
-      - name: Packaging LLVM C API (LLVM C API Libraries, Binaries & Includes)
+      - name: Packaging MLIR C API (MLIR C API Libraries, Binaries & Includes)
         run: |
           tar --format=pax -cJf mlir-c-api-x64-linux.tar.xz --exclude='*/*.cmake' --exclude='*/*.o' --exclude='*/*.d' lib bin include
           
         working-directory: tempDir
 
-      - name: Releasing LLVM C API
+      - name: Releasing MLIR C API
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.BUILD_ID }}
