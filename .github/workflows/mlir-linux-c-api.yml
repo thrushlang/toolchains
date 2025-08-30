@@ -29,12 +29,12 @@ jobs:
     
       - name: Downloading LLVM project
         run: |
-          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/llvm-project-17.0.6.src.tar.xz
+          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.0/llvm-project-21.1.0.src.tar.xz
 
       - name: Unpacking LLVM project 
         run: |
-          tar -xf llvm-project-17.0.6.src.tar.xz
-          mv llvm-project-17.0.6.src llvm-project
+          tar -xf llvm-project-21.1.0.src.tar.xz
+          mv llvm-project-21.1.0.src llvm-project
 
       - name: Installing dependencies
         run: |
