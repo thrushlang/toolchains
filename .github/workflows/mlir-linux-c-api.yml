@@ -1,0 +1,93 @@
+name: MLIR-C API (Linux)
+
+on:
+  push:
+    tags:
+      - 'MLIR-C-API-LINUX-v*.*.*'
+
+jobs:
+  build-llvm:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+  
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+  
+    steps:
+      - name: Generating Unique ID
+        run: |
+          BASE_NAME=$(echo "$GITHUB_REF" | sed 's|^refs/tags/||')
+          BUILD_ID="${BASE_NAME}-$GITHUB_RUN_ID" 
+          
+          echo "BUILD_ID=$BUILD_ID" >> $GITHUB_ENV
+          echo "BUILD_ID=$TAG_NAME" >> $GITHUB_ENV
+
+          echo "Unique ID: $BUILD_ID"
+          echo "Base name: $TAG_NAME"
+    
+      - name: Downloading LLVM project
+        run: |
+          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/llvm-project-17.0.6.src.tar.xz
+
+      - name: Unpacking LLVM project 
+        run: |
+          tar -xf llvm-project-17.0.6.src.tar.xz
+          mv llvm-project-17.0.6.src llvm-project
+
+      - name: Installing dependencies
+        run: |
+          sudo apt-get install -y build-essential cmake ninja-build python3 libz-dev binutils xz-utils
+          sudo apt-get remove -y llvm-16* clang-16*
+          sudo rm -rf /usr/lib/llvm-16
+
+      - name: Preparing for build (LLVM-C API)
+        run: |
+          mkdir build
+          mkdir dist
+          cd build
+        working-directory: llvm-project/llvm
+
+      - name: Configuring CMake (LLVM C API)
+        run: |
+          cmake ../CMakeLists.txt -G Ninja -DCMAKE_C_COMPILER="gcc" -DCMAKE_CXX_COMPILER="g++" -DLLVM_ENABLE_PROJECTS="mlir" -DLLVM_ENABLE_TERMINFO=OFF -DLLVM_ENABLE_ZLIB=OFF -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE -DLLVM_ENABLE_LIBXML2=0 -DCMAKE_INSTALL_PREFIX="../dist" -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_TARGETS_TO_BUILD=all
+        working-directory: llvm-project/llvm/build
+
+      - name: Building LLVM C API
+        run: |
+          ninja -j$(nproc)
+        working-directory: llvm-project/llvm/build
+
+      - name: Cleaning LLVM Binaries
+        run: |
+          find llvm-project/llvm/build/bin -type f -executable ! -name "llvm-config" -delete
+
+      - name: Cloning LLVM C API
+        shell: bash
+        run: |
+          mkdir -p tempDir/{lib,bin,include}
+          
+          cp -r llvm-project/llvm/build/lib/* tempDir/lib/
+          cp -r llvm-project/llvm/build/bin/* tempDir/bin/
+          cp -r llvm-project/llvm/build/include/* tempDir/include/
+
+      - name: Packaging LLVM C API (LLVM C API Libraries, Binaries & Includes)
+        run: |
+          tar --format=pax -cJf mlir-c-api-x64-linux.tar.xz --exclude='*/*.cmake' --exclude='*/*.o' --exclude='*/*.d' lib bin include
+        working-directory: tempDir
+
+      - name: Releasing LLVM C API
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.BUILD_ID }}
+          name: "MLIR C API (Linux)"
+          body: |
+            ## MLIR C API
+           
+            MLIR C API (v17.0.6) libraries for Linux x64 environments.
+            
+          files: |
+            tempDir/mlir-c-api-x64-linux.tar.xz
+            
+          draft: false
