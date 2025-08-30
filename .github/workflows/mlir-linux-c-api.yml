@@ -46,7 +46,7 @@ jobs:
           mkdir dist
           cd build
           
-        working-directory: llvm-project/llvm/mlir
+        working-directory: llvm-project/mlir
 
       - name: Configuring CMake (MLIR C API)
         run: |
@@ -63,21 +63,21 @@ jobs:
           -DCMAKE_BUILD_TYPE=MinSizeRel \
           -DLLVM_TARGETS_TO_BUILD="Native" 
         
-        working-directory: llvm-project/llvm/mlir/build
+        working-directory: llvm-project/mlir/build
 
       - name: Building MLIR C API
         run: |
           ninja -j$(nproc)
-        working-directory: llvm-project/llvm/mlir/build
+        working-directory: llvm-project/mlir/build
 
       - name: Installing MLIR C API
         run: |
           ninja -j$(nproc)
-        working-directory: llvm-project/llvm/mlir/build
+        working-directory: llvm-project/mlir/build
 
       - name: Cleaning MLIR Binaries
         run: |
-          find llvm-project/llvm/mlir/build/bin -type f -executable ! -name "llvm-config" -delete
+          find llvm-project/mlir/build/bin -type f -executable ! -name "llvm-config" -delete
 
       - name: Cloning MLIR C API
         shell: bash
