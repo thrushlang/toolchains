@@ -63,13 +63,12 @@ jobs:
           -DLLVM_ENABLE_LIBXML2=0 \
           -DCMAKE_INSTALL_PREFIX="../dist" \
           -DCMAKE_BUILD_TYPE=MinSizeRel \
-          -DLLVM_TARGETS_TO_BUILD=all
         
         working-directory: llvm-project/llvm/build
 
       - name: Building MLIR C API
         run: |
-          ninja mlir -j$(nproc)
+          ninja -j$(nproc)
         working-directory: llvm-project/llvm/build
 
       - name: Cleaning MLIR Binaries
