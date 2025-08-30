@@ -72,7 +72,7 @@ jobs:
         run: |
           cd llvm-project\llvm\build
           cmake ..\CMakeLists.txt -G Ninja `
-            -DLLVM_ENABLE_PROJECTS="llvm;mlir;lld" `
+            -DLLVM_ENABLE_PROJECTS="llvm;lld" `
             -DCMAKE_C_COMPILER_TARGET=x86_64-pc-windows-msvc `
             -DCMAKE_CXX_COMPILER_TARGET=x86_64-pc-windows-msvc `
             -DCMAKE_CXX_FLAGS="-Os" `
