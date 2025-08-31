@@ -76,10 +76,6 @@ jobs:
           ninja install
         working-directory: llvm-project/llvm/build
 
-      - name: Cleaning MLIR Binaries
-        run: |
-          find llvm-project/llvm/dist/bin -type f -executable ! -name "llvm-config" -delete
-
       - name: Cloning MLIR C API
         shell: bash
         run: |
