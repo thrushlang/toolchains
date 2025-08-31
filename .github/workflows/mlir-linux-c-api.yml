@@ -29,16 +29,16 @@ jobs:
     
       - name: Downloading LLVM project
         run: |
-          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.0/llvm-project-21.1.0.src.tar.xz
+          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.0/llvm-project-20.1.0.src.tar.xz
 
       - name: Unpacking LLVM project 
         run: |
-          tar -xf llvm-project-21.1.0.src.tar.xz
-          mv llvm-project-21.1.0.src llvm-project
+          tar -xf llvm-project-20.1.0.src.tar.xz
+          mv llvm-project-20.1.0.src llvm-project
 
       - name: Installing dependencies
         run: |
-          sudo apt-get install -y build-essential cmake ninja-build python3 libz-dev binutils xz-utils clang llvm
+          sudo apt-get install -y build-essential cmake ninja-build python3 libz-dev binutils xz-utils clang llvm lld
 
       - name: Preparing for build (MLIR-C API)
         run: |
@@ -54,6 +54,7 @@ jobs:
           -G Ninja \
           -DCMAKE_C_COMPILER="clang" \
           -DCMAKE_CXX_COMPILER="clang++" \
+          -DLLVM_USE_LINKER=lld
           -DLLVM_ENABLE_PROJECTS="mlir" \
           -DLLVM_ENABLE_TERMINFO=OFF \
           -DLLVM_ENABLE_ZLIB=OFF \
