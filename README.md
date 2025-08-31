@@ -35,12 +35,12 @@ This repository contains a pre-compiled version of the LLVM C API for building T
 
 ## MLIR C API
 
-- VERSION: **v17.0.6** 
+- VERSION: **v20.1.0** 
 - OPERATING SYSTEMS: Linux (x86_64)
 
 ## MLIR C API
 
-- VERSION: **v18.0.8** 
+- VERSION: **v20.1.0** 
 - OPERATING SYSTEMS: Windows (x86_64)
 
 ## MLIR (Toolchain)
