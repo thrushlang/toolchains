@@ -72,7 +72,7 @@ jobs:
 
       - name: Installing MLIR C API
         run: |
-          ninja -j$(nproc)
+          ninja install
         working-directory: llvm-project/llvm/build
 
       - name: Cleaning MLIR Binaries
