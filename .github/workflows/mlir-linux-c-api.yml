@@ -85,7 +85,7 @@ jobs:
           mkdir -p tempDir/{lib,bin,include}
           
           cp -r llvm-project/llvm/dist/lib/* tempDir/lib/
-          cp -r llvm-project/llvm/dist/bin/* tempDir/bin/
+          cp -r llvm-project/llvm/build/bin/* tempDir/bin/
           cp -r llvm-project/llvm/dist/include/* tempDir/include/
 
       - name: Packaging MLIR C API (MLIR C API Libraries, Binaries & Includes)
