@@ -56,12 +56,8 @@ jobs:
           -DCMAKE_CXX_COMPILER="clang++" \
           -DLLVM_USE_LINKER=lld \
           -DLLVM_ENABLE_PROJECTS="mlir" \
-          -DLLVM_ENABLE_TERMINFO=OFF \
-          -DLLVM_ENABLE_ZLIB=OFF \
-          -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE \
-          -DLLVM_ENABLE_LIBXML2=0 \
           -DCMAKE_INSTALL_PREFIX="../dist" \
-          -DCMAKE_BUILD_TYPE=MinSizeRel \
+          -DCMAKE_BUILD_TYPE=Release \
           -DLLVM_TARGETS_TO_BUILD="Native" 
         
         working-directory: llvm-project/llvm/build
