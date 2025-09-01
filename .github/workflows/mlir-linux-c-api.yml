@@ -29,12 +29,12 @@ jobs:
     
       - name: Downloading LLVM project
         run: |
-          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.0/llvm-project-20.1.0.src.tar.xz
+          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/llvm-project-17.0.6.src.tar.xz
 
       - name: Unpacking LLVM project 
         run: |
-          tar -xf llvm-project-20.1.0.src.tar.xz
-          mv llvm-project-20.1.0.src llvm-project
+          tar -xf llvm-project-17.0.6.src
+          mv lllvm-project-17.0.6.src llvm-project
 
       - name: Installing dependencies
         run: |
@@ -95,7 +95,7 @@ jobs:
           body: |
             ## MLIR C API
            
-            MLIR C API (v20.1.0) libraries for Linux x64 environments.
+            MLIR C API (v17.0.6) libraries for Linux x64 environments.
             
           files: |
             tempDir/mlir-c-api-x64-linux.tar.xz
