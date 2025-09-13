@@ -1,3 +1,5 @@
+<img src= "https://github.com/thrushlang/.github/blob/main/assets/logos/thrushlang-logo.png" alt= "logo" style= "width: 80%; height: 80%;"> </img>
+
 # Toolchains
 
 This repository contains a pre-compiled version of the LLVM C API for building The Thrush Compiler and using LLVM in between.
