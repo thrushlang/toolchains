@@ -8,6 +8,10 @@ on:
 jobs:
   build-llvm:
     runs-on: ubuntu-latest
+    
+    # Usar un contenedor con un toolchain Musl preinstalado
+    container:
+      image: messense/rust-musl-cross:x86_64-musl
 
     permissions:
       contents: write
@@ -38,17 +42,7 @@ jobs:
 
       - name: Installing dependencies
         run: |
-          sudo apt-get install -y build-essential cmake ninja-build python3 libz-dev binutils xz-utils musl musl-tools
-          sudo apt-get remove -y llvm-16* clang-16*
-          sudo rm -rf /usr/lib/llvm-16
-
-      - name: Searching C & C++ compilers
-        run: |
-          C_COMPILER=$(which x86_64-linux-musl-gcc)
-          CXX_COMPILER=$(which x86_64-linux-musl-c++)
-
-          echo "C_COMPILER=$C_COMPILER" >> $GITHUB_ENV
-          echo "CXX_COMPILER=$CXX_COMPILER" >> $GITHUB_ENV
+          apk add build-base cmake ninja python3 binutils xz
 
       - name: Preparing for build (LLVM-C API)
         run: |
@@ -61,8 +55,8 @@ jobs:
         run: |
           cmake ../CMakeLists.txt -G Ninja \
           -DCMAKE_BUILD_TYPE=MinSizeRel \
-          -DCMAKE_C_COMPILER="${{ env.C_COMPILER }}" \
-          -DCMAKE_CXX_COMPILER="${{ env.CXX_COMPILER }}" \
+          -DCMAKE_C_COMPILER=musl-gcc \
+          -DCMAKE_CXX_COMPILER=musl-g++ \
           -DLLD_INCLUDE_TOOLS=ON \
           -DLLVM_ENABLE_PROJECTS="llvm;lld" \
           -DLLVM_ENABLE_TERMINFO=OFF \
@@ -70,7 +64,7 @@ jobs:
           -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE \
           -DLLVM_ENABLE_LIBXML2=0 \
           -DCMAKE_INSTALL_PREFIX="../dist" \
-          -DLLVM_TARGETS_TO_BUILD=all \
+          -DLLVM_TARGETS_TO_BUILD=X86 \
           -DLLVM_BUILD_TESTS=OFF \
           -DLLVM_BUILD_EXAMPLES=OFF \
           -DLLVM_INCLUDE_TESTS=OFF \
@@ -91,15 +85,15 @@ jobs:
 
       - name: Cleaning LLVM Binaries
         run: |
-          find llvm-project/llvm/build/bin -type f -executable ! -name "llvm-config" -delete
+          find llvm-project/llvm/dist/bin -type f -executable ! -name "llvm-config" -delete
 
       - name: Cloning LLVM C API
         shell: bash
         run: |
           mkdir -p tempDir/{lib,bin,include}
           
-          cp -r llvm-project/llvm/build/lib/* tempDir/lib/
-          cp -r llvm-project/llvm/build/bin/* tempDir/bin/
+          cp -r llvm-project/llvm/dist/lib/* tempDir/lib/
+          cp -r llvm-project/llvm/dist/bin/* tempDir/bin/
           cp -r llvm-project/llvm/dist/include/* tempDir/include/
 
       - name: Packaging LLVM (LLVM Libraries, Binaries & Includes)
@@ -119,5 +113,4 @@ jobs:
             
           files: |
             tempDir/llvm-x86_64-unknown-linux-musl.tar.xz
-            
           draft: false
