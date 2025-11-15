@@ -28,7 +28,16 @@ jobs:
       - name: Installing dependencies
         run: |
           apt-get update
-          apt-get install -y build-essential cmake ninja-build python3 wget libz-dev binutils xz-utils gcc g++
+          apt-get install -y software-properties-common
+
+          add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          apt-get update
+
+          apt-get purge -y gcc g++ || true
+          apt-get install -y build-essential cmake ninja-build python3 wget libz-dev binutils xz-utils gcc-10 g++-10
+
+          update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100
+          update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 100
 
           apt-get purge --assume-yes g++-mingw-w64-x86-64 gfortran-mingw-w64-x86-64
           apt-get install --assume-yes g++-mingw-w64-x86-64 gfortran-mingw-w64-x86-64
