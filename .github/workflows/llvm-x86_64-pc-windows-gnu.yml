@@ -67,7 +67,7 @@ jobs:
         run: |
           mkdir -p llvm-build
 
-      - name: Configure LLVM for cross-compilation to musl
+      - name: Configure LLVM for cross-compilation 
         run: |
           cmake ../llvm-project/llvm -G Ninja \
             -DCMAKE_CROSSCOMPILING=ON \ 
