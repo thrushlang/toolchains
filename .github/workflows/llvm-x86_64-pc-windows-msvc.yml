@@ -3,7 +3,7 @@ name: llvm-x86_64-pc-windows-msvc
 on:
   push:
     tags:
-      - 'x86_64-pc-windows-msvc-v*.*.*'
+      - 'llvm-x86_64-pc-windows-msvc-v*.*.*'
 
 jobs:
   build-llvm:
@@ -127,19 +127,19 @@ jobs:
         shell: pwsh
         run: |
           cd tempDir
-          7z a -tzip x86_64-pc-windows-msvc.zip lib bin include
+          7z a -tzip llvm-x86_64-pc-windows-msvc.zip lib bin include
         
       - name: Releasing LLVM
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.BUILD_ID }}
-          name: "x86_64-pc-windows-msvc"
+          name: "llvm-x86_64-pc-windows-msvc"
           body: |
-            ## llvm-x86_64-unknown-linux-gnu
+            ## llvm-x86_64-pc-windows-msvc
             
             LLVM for x86_64-pc-windows-msvc host target for Thrush Compiler build phase.
             
           files: |
-            tempDir/x86_64-pc-windows-msvc.zip
+            tempDir/llvm-x86_64-pc-windows-msvc.zip
             
           draft: false
