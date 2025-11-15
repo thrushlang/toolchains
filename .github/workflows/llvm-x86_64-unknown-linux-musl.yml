@@ -42,6 +42,12 @@ jobs:
           sudo apt-get remove -y llvm-16* clang-16*
           sudo rm -rf /usr/lib/llvm-16
 
+          C_COMPILER=$(which x86_64-linux-musl-gcc)
+          CXX_COMPILER=$(which x86_64-linux-musl-c++)
+
+          echo "C_COMPILER=$C_COMPILER" >> $GITHUB_ENV
+          echo "CXX_COMPILER=$CXX_COMPILER" >> $GITHUB_ENV
+
       - name: Preparing for build (LLVM-C API)
         run: |
           mkdir build
@@ -53,8 +59,8 @@ jobs:
         run: |
           cmake ../CMakeLists.txt -G Ninja \
           -DCMAKE_BUILD_TYPE=MinSizeRel \
-          -DCMAKE_C_COMPILER="x86_64-linux-musl-gcc" \
-          -DCMAKE_CXX_COMPILER="x86_64-linux-musl-g++" \
+          -DCMAKE_C_COMPILER="${{ env.C_COMPILER }}" \
+          -DCMAKE_CXX_COMPILER="${{ env.CXX_COMPILER }}" \
           -DLLD_INCLUDE_TOOLS=ON \
           -DLLVM_ENABLE_PROJECTS="llvm;lld" \
           -DLLVM_ENABLE_TERMINFO=OFF \
