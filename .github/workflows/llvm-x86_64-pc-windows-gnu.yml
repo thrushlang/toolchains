@@ -8,7 +8,7 @@ jobs:
   build-llvm:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/cross-rs/x86_64-pc-windows-gnu
+      image: devcheck/x86_64-pc-windows-gnu:latest
     permissions:
       contents: write
     env:
@@ -28,22 +28,10 @@ jobs:
       - name: Installing dependencies
         run: |
           apt-get update
-          apt-get install -y software-properties-common
+          apt-get install -y build-essential cmake ninja-build python3 wget libz-dev binutils xz-utils
 
-          add-apt-repository -y ppa:ubuntu-toolchain-r/test
-          apt-get update
-
-          apt-get purge -y gcc g++ || true
-          apt-get install -y build-essential cmake ninja-build python3 wget libz-dev binutils xz-utils gcc-10 g++-10
-
-          update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100
-          update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 100
-
-          apt-get purge --assume-yes g++-mingw-w64-x86-64 gfortran-mingw-w64-x86-64
-          apt-get install --assume-yes g++-mingw-w64-x86-64 gfortran-mingw-w64-x86-64
-
-          apt-get remove -y llvm-16* clang-16* || true
-          rm -rf /usr/lib/llvm-16
+          apt-get remove -y llvm-14* clang-14* || true
+          rm -rf /usr/lib/llvm-14
 
       - name: Downloading LLVM project
         run: |
