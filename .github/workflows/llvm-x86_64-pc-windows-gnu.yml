@@ -72,8 +72,8 @@ jobs:
         run: |
           cmake ../llvm-project/llvm -G Ninja \
             -DCMAKE_BUILD_TYPE=MinSizeRel \
-            -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc \
-            -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ \
+            -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc-posix \
+            -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++-posix \
             -DCMAKE_SYSROOT=/usr/x86_64-w64-mingw32 \
             -DLLVM_TABLEGEN=/host-tools/bin/llvm-tblgen \
             -DLLVM_CONFIG_PATH=/host-tools/bin/llvm-config \
