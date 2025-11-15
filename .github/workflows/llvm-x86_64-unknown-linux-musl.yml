@@ -31,6 +31,10 @@ jobs:
           echo "Unique ID: $BUILD_ID"
           echo "Base name: $TAG_NAME"
     
+      - name: Installing dependencies
+        run: |
+          apk add build-base cmake ninja python3 binutils xz wget tar
+
       - name: Downloading LLVM project
         run: |
           wget https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/llvm-project-17.0.6.src.tar.xz
@@ -39,10 +43,6 @@ jobs:
         run: |
           tar -xf llvm-project-17.0.6.src.tar.xz
           mv llvm-project-17.0.6.src llvm-project
-
-      - name: Installing dependencies
-        run: |
-          apk add build-base cmake ninja python3 binutils xz
 
       - name: Preparing for build (LLVM-C API)
         run: |
