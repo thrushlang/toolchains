@@ -32,7 +32,7 @@ jobs:
     
       - name: Installing dependencies
         run: |
-          sudo apt-get install -y build-essential cmake ninja-build python3 libz-dev binutils xz-utils musl musl-tools
+          sudo apt-get install -y build-essential cmake ninja-build python3 libz-dev binutils xz-utils
           sudo apt-get remove -y llvm-16* clang-16*
           sudo rm -rf /usr/lib/llvm-16
 
