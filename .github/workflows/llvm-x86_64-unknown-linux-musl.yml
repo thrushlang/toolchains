@@ -133,7 +133,7 @@ jobs:
           body: |
             ## llvm-x86_64-unknown-linux-musl
             
-            LLVM libraries for llvm-x86_64-unknown-linux-musl for Thrush compiler compilation.
+            LLVM for x86_64-unknown-linux-musl host target for Thrush Compiler build phase.
 
           files: |
             tempDir/llvm-x86_64-unknown-linux-musl.tar.xz
