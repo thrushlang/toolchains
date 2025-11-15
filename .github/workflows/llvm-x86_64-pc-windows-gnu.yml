@@ -70,6 +70,7 @@ jobs:
       - name: Configure LLVM for cross-compilation to musl
         run: |
           cmake ../llvm-project/llvm -G Ninja \
+            -DCMAKE_CROSSCOMPILING=ON \ 
             -DCMAKE_BUILD_TYPE=MinSizeRel \
             -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc-posix \
             -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++-posix \
