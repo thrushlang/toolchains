@@ -42,27 +42,6 @@ jobs:
           tar -xf llvm-project-17.0.6.src.tar.xz
           mv llvm-project-17.0.6.src llvm-project
 
-      - name: Creating host-tools build directory 
-        run: |
-           mkdir -p host-build
-          
-      - name: Build host tools first
-        run: |
-          cmake ../llvm-project/llvm -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DLLVM_ENABLE_PROJECTS="llvm" \
-            -DLLVM_TARGETS_TO_BUILD="X86" \
-            -DLLVM_BUILD_TESTS=OFF \
-            -DLLVM_INCLUDE_TESTS=OFF \
-            -DLLVM_INCLUDE_EXAMPLES=OFF \
-            -DLLVM_INCLUDE_DOCS=OFF \
-            -DCMAKE_INSTALL_PREFIX="/host-tools"
-
-          ninja -j$(nproc) llvm-tblgen llvm-config
-          ninja install
-          
-        working-directory: host-build
-
       - name: Creating cross-compilation build directory
         run: |
           mkdir -p llvm-build
@@ -70,26 +49,23 @@ jobs:
       - name: Configure LLVM for cross-compilation 
         run: |
           cmake ../llvm-project/llvm -G Ninja \
-            -DCMAKE_CROSSCOMPILING=ON \ 
-            -DCMAKE_BUILD_TYPE=MinSizeRel \
-            -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc-posix \
-            -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++-posix \
-            -DCMAKE_SYSROOT=/usr/x86_64-w64-mingw32 \
-            -DLLVM_TABLEGEN=/host-tools/bin/llvm-tblgen \
-            -DLLVM_CONFIG_PATH=/host-tools/bin/llvm-config \
-            -DLLVM_ENABLE_PROJECTS="llvm;lld" \
-            -DLLVM_ENABLE_TERMINFO=OFF \
-            -DLLVM_ENABLE_ZLIB=ON \
-            -DLLVM_ENABLE_LIBXML2=OFF \
-            -DCMAKE_INSTALL_PREFIX="dist" \
-            -DLLVM_TARGETS_TO_BUILD=all \
-            -DLLVM_BUILD_TESTS=OFF \
-            -DLLVM_BUILD_EXAMPLES=OFF \
-            -DLLVM_INCLUDE_TESTS=OFF \
-            -DLLVM_INCLUDE_EXAMPLES=OFF \
-            -DLLVM_INCLUDE_DOCS=OFF \
-            -DLLVM_ENABLE_MODULES=OFF \
-            -DLLVM_ENABLE_PIC=ON
+          -DCMAKE_BUILD_TYPE=MinSizeRel \
+          -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc-posix \
+          -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++-posix \
+          -DCMAKE_SYSROOT=/usr/x86_64-w64-mingw32 \
+          -DLLVM_ENABLE_PROJECTS="llvm;lld" \
+          -DLLVM_ENABLE_TERMINFO=OFF \
+          -DLLVM_ENABLE_ZLIB=ON \
+          -DLLVM_ENABLE_LIBXML2=OFF \
+          -DCMAKE_INSTALL_PREFIX="dist" \
+          -DLLVM_TARGETS_TO_BUILD=all \
+          -DLLVM_BUILD_TESTS=OFF \
+          -DLLVM_BUILD_EXAMPLES=OFF \
+          -DLLVM_INCLUDE_TESTS=OFF \
+          -DLLVM_INCLUDE_EXAMPLES=OFF \
+          -DLLVM_INCLUDE_DOCS=OFF \
+          -DLLVM_ENABLE_MODULES=OFF \
+          -DLLVM_ENABLE_PIC=ON
 
         working-directory: llvm-build
         
