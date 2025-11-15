@@ -32,8 +32,11 @@ jobs:
     
       - name: Installing dependencies
         run: |
-          apk update
-          apk add build-base cmake ninja python3 wget xz
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake ninja-build python3 wget libz-dev binutils xz-utils
+          
+          sudo apt-get remove -y llvm-16* clang-16* || true
+          sudo rm -rf /usr/lib/llvm-16
 
       - name: Downloading LLVM project
         run: |
@@ -52,21 +55,21 @@ jobs:
         run: |
           cmake ../llvm-project/llvm -G Ninja \
             -DCMAKE_BUILD_TYPE=MinSizeRel \
-            -DCMAKE_C_COMPILER=gcc \
-            -DCMAKE_CXX_COMPILER=g++ \
+            -DCMAKE_C_COMPILER=x86_64-unknown-linux-musl-gcc \
+            -DCMAKE_CXX_COMPILER=x86_64-unknown-linux-musl-g++ \
+            -DLLD_INCLUDE_TOOLS=ON \
             -DLLVM_ENABLE_PROJECTS="llvm;lld" \
             -DLLVM_ENABLE_TERMINFO=OFF \
             -DLLVM_ENABLE_ZLIB=OFF \
-            -DLLVM_ENABLE_LIBXML2=OFF \
+            -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE \
+            -DLLVM_ENABLE_LIBXML2=0 \
             -DCMAKE_INSTALL_PREFIX="dist" \
-            -DLLVM_TARGETS_TO_BUILD="X86" \
+            -DLLVM_TARGETS_TO_BUILD=X86 \
             -DLLVM_BUILD_TESTS=OFF \
             -DLLVM_BUILD_EXAMPLES=OFF \
             -DLLVM_INCLUDE_TESTS=OFF \
             -DLLVM_INCLUDE_EXAMPLES=OFF \
-            -DLLVM_INCLUDE_DOCS=OFF \
-            -DLLVM_BUILD_LLVM_DYLIB=ON \
-            -DLLVM_LINK_LLVM_DYLIB=ON
+            -DLLVM_INCLUDE_DOCS=OFF
         working-directory: llvm-build
 
       - name: Building LLVM tools first
@@ -82,7 +85,7 @@ jobs:
           ./bin/llvm-min-tblgen --version
         working-directory: llvm-build
 
-      - name: Building complete LLVM
+      - name: Building LLVM
         run: |
           ninja -j$(nproc)
         working-directory: llvm-build
@@ -104,9 +107,9 @@ jobs:
           cp -r llvm-build/dist/bin/* tempDir/bin/
           cp -r llvm-build/dist/include/* tempDir/include/
 
-      - name: Packaging LLVM
+      - name: Packaging LLVM (LLVM Libraries, Binaries & Includes)
         run: |
-          tar --format=pax -cJf llvm-x86_64-unknown-linux-musl.tar.xz lib bin include
+          tar --format=pax -cJf llvm-x86_64-unknown-linux-musl.tar.xz --exclude='*/*.cmake' --exclude='*/*.o' --exclude='*/*.d' lib bin include
         working-directory: tempDir
 
       - name: Releasing LLVM
@@ -116,7 +119,9 @@ jobs:
           name: "llvm-x86_64-unknown-linux-musl"
           body: |
             ## llvm-x86_64-unknown-linux-musl
+           
             LLVM libraries for llvm-x86_64-unknown-linux-musl for Thrush compiler compilation.
+            
           files: |
             tempDir/llvm-x86_64-unknown-linux-musl.tar.xz
           draft: false
