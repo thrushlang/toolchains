@@ -53,9 +53,8 @@ jobs:
           -DCMAKE_SYSTEM_NAME=Windows \
           -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc-posix \
           -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++-posix \
-          -DCMAKE_SYSROOT=/usr/x86_64-w64-mingw32 \
-          -DCMAKE_C_FLAGS="-idirafter/usr/include" \
-          -DCMAKE_CXX_FLAGS="-idirafter/usr/include" \
+          -DCMAKE_C_FLAGS="--sysroot=/usr/x86_64-w64-mingw32 -idirafter/usr/include" \
+          -DCMAKE_CXX_FLAGS="--sysroot=/usr/x86_64-w64-mingw32 -idirafter/usr/include" \
           -DLLVM_ENABLE_PROJECTS="llvm;lld" \
           -DLLVM_ENABLE_TERMINFO=OFF \
           -DLLVM_ENABLE_ZLIB=ON \
