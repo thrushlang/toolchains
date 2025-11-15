@@ -50,9 +50,12 @@ jobs:
         run: |
           cmake ../llvm-project/llvm -G Ninja \
           -DCMAKE_BUILD_TYPE=MinSizeRel \
+          -DCMAKE_SYSTEM_NAME=Windows \
           -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc-posix \
           -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++-posix \
           -DCMAKE_SYSROOT=/usr/x86_64-w64-mingw32 \
+          -DCMAKE_C_FLAGS="-idirafter/usr/include" \
+          -DCMAKE_CXX_FLAGS="-idirafter/usr/include" \
           -DLLVM_ENABLE_PROJECTS="llvm;lld" \
           -DLLVM_ENABLE_TERMINFO=OFF \
           -DLLVM_ENABLE_ZLIB=ON \
@@ -63,9 +66,7 @@ jobs:
           -DLLVM_BUILD_EXAMPLES=OFF \
           -DLLVM_INCLUDE_TESTS=OFF \
           -DLLVM_INCLUDE_EXAMPLES=OFF \
-          -DLLVM_INCLUDE_DOCS=OFF \
-          -DLLVM_ENABLE_MODULES=OFF \
-          -DLLVM_ENABLE_PIC=ON
+          -DLLVM_INCLUDE_DOCS=OFF 
 
         working-directory: llvm-build
         
