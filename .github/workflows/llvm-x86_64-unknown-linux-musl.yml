@@ -51,14 +51,13 @@ jobs:
 
       - name: Configuring CMake (LLVM C API)
         run: |
-          cmake ../CMakeLists.txt \ 
-          -G Ninja \
+          cmake ../CMakeLists.txt -G Ninja \
           -DCMAKE_BUILD_TYPE=MinSizeRel \
           -DCMAKE_C_COMPILER="x86_64-linux-musl-gcc" \
           -DCMAKE_CXX_COMPILER="x86_64-linux-musl-g++" \
           -DLLD_INCLUDE_TOOLS=ON \
           -DLLVM_ENABLE_PROJECTS="llvm;lld" \
-          -DLLVM_ENABLE_TERMINFO=OFF 
+          -DLLVM_ENABLE_TERMINFO=OFF \
           -DLLVM_ENABLE_ZLIB=OFF \
           -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE \
           -DLLVM_ENABLE_LIBXML2=0 \
