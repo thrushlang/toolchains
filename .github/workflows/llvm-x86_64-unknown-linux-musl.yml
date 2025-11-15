@@ -47,50 +47,58 @@ jobs:
           tar -xf llvm-project-17.0.6.src.tar.xz
           mv llvm-project-17.0.6.src llvm-project
 
-      - name: Creating build directory
+      - name: Build host tools first (para glibc - herramientas nativas)
+        run: |
+          mkdir -p host-build
+          cmake ../llvm-project/llvm -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DLLVM_ENABLE_PROJECTS="llvm" \
+            -DLLVM_TARGETS_TO_BUILD="X86" \
+            -DLLVM_BUILD_TESTS=OFF \
+            -DLLVM_INCLUDE_TESTS=OFF \
+            -DLLVM_INCLUDE_EXAMPLES=OFF \
+            -DLLVM_INCLUDE_DOCS=OFF \
+            -DCMAKE_INSTALL_PREFIX="/host-tools"
+          ninja -j$(nproc) llvm-tblgen llvm-config
+          ninja install
+        working-directory: host-build
+
+      - name: Creating cross-compilation build directory
         run: |
           mkdir -p llvm-build
 
-      - name: Configure LLVM build
+      - name: Configure LLVM for cross-compilation to musl
         run: |
           cmake ../llvm-project/llvm -G Ninja \
             -DCMAKE_BUILD_TYPE=MinSizeRel \
             -DCMAKE_C_COMPILER=x86_64-unknown-linux-musl-gcc \
             -DCMAKE_CXX_COMPILER=x86_64-unknown-linux-musl-g++ \
-            -DLLD_INCLUDE_TOOLS=ON \
+            -DCMAKE_SYSROOT=/usr/local/musl/x86_64-unknown-linux-musl \
+            -DLLVM_TABLEGEN=/host-tools/bin/llvm-tblgen \
+            -DLLVM_CONFIG_PATH=/host-tools/bin/llvm-config \
             -DLLVM_ENABLE_PROJECTS="llvm;lld" \
             -DLLVM_ENABLE_TERMINFO=OFF \
-            -DLLVM_ENABLE_ZLIB=OFF \
-            -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE \
-            -DLLVM_ENABLE_LIBXML2=0 \
+            -DLLVM_ENABLE_ZLIB=ON \
+            -DLLVM_ENABLE_LIBXML2=OFF \
             -DCMAKE_INSTALL_PREFIX="dist" \
-            -DLLVM_TARGETS_TO_BUILD=X86 \
+            -DLLVM_TARGETS_TO_BUILD="X86" \
+            -DLLVM_HOST_TRIPLE=x86_64-unknown-linux-musl \
+            -DLLVM_DEFAULT_TARGET_TRIPLE=x86_64-unknown-linux-musl \
             -DLLVM_BUILD_TESTS=OFF \
             -DLLVM_BUILD_EXAMPLES=OFF \
             -DLLVM_INCLUDE_TESTS=OFF \
             -DLLVM_INCLUDE_EXAMPLES=OFF \
-            -DLLVM_INCLUDE_DOCS=OFF
+            -DLLVM_INCLUDE_DOCS=OFF \
+            -DLLVM_BUILD_LLVM_DYLIB=ON \
+            -DLLVM_LINK_LLVM_DYLIB=ON
         working-directory: llvm-build
 
-      - name: Building LLVM tools first
-        run: |
-          # Primero construimos solo las herramientas esenciales
-          ninja -j$(nproc) llvm-min-tblgen llvm-tblgen llvm-config
-        working-directory: llvm-build
-
-      - name: Verify tools are built
-        run: |
-          ls -la bin/llvm-min-tblgen
-          file bin/llvm-min-tblgen
-          ./bin/llvm-min-tblgen --version
-        working-directory: llvm-build
-
-      - name: Building LLVM
+      - name: Building LLVM for musl
         run: |
           ninja -j$(nproc)
         working-directory: llvm-build
 
-      - name: Installing LLVM
+      - name: Installing LLVM for musl
         run: |
           ninja install
         working-directory: llvm-build
