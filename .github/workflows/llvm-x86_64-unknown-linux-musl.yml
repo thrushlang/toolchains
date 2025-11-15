@@ -47,13 +47,13 @@ jobs:
           tar -xf llvm-project-17.0.6.src.tar.xz
           mv llvm-project-17.0.6.src llvm-project
 
-      - name: Clean and prepare build directory
+      - name: Clean and configure build
         run: |
           rm -rf llvm-project/llvm/build
           mkdir -p llvm-project/llvm/build
           cd llvm-project/llvm/build
           
-          cmake .. -G Ninja \
+          cmake ../CMakeLists.txt -G Ninja \
             -DCMAKE_BUILD_TYPE=MinSizeRel \
             -DCMAKE_C_COMPILER=x86_64-unknown-linux-musl-gcc \
             -DCMAKE_CXX_COMPILER=x86_64-unknown-linux-musl-g++ \
