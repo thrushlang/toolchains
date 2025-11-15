@@ -47,34 +47,30 @@ jobs:
           tar -xf llvm-project-17.0.6.src.tar.xz
           mv llvm-project-17.0.6.src llvm-project
 
-      - name: Preparing for build (LLVM-C API)
+      - name: Clean and prepare build directory
         run: |
-          mkdir build
-          mkdir dist
-          cd build
+          rm -rf llvm-project/llvm/build
+          mkdir -p llvm-project/llvm/build
+          cd llvm-project/llvm/build
+          
+          cmake .. -G Ninja \
+            -DCMAKE_BUILD_TYPE=MinSizeRel \
+            -DCMAKE_C_COMPILER=x86_64-unknown-linux-musl-gcc \
+            -DCMAKE_CXX_COMPILER=x86_64-unknown-linux-musl-g++ \
+            -DLLD_INCLUDE_TOOLS=ON \
+            -DLLVM_ENABLE_PROJECTS="llvm;lld" \
+            -DLLVM_ENABLE_TERMINFO=OFF \
+            -DLLVM_ENABLE_ZLIB=OFF \
+            -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE \
+            -DLLVM_ENABLE_LIBXML2=0 \
+            -DCMAKE_INSTALL_PREFIX="../dist" \
+            -DLLVM_TARGETS_TO_BUILD=X86 \
+            -DLLVM_BUILD_TESTS=OFF \
+            -DLLVM_BUILD_EXAMPLES=OFF \
+            -DLLVM_INCLUDE_TESTS=OFF \
+            -DLLVM_INCLUDE_EXAMPLES=OFF \
+            -DLLVM_INCLUDE_DOCS=OFF
         working-directory: llvm-project/llvm
-
-      - name: Configuring CMake (LLVM C API)
-        run: |
-          cmake ../CMakeLists.txt -G Ninja \
-          -DCMAKE_BUILD_TYPE=MinSizeRel \
-          -DCMAKE_C_COMPILER=x86_64-unknown-linux-musl-gcc \
-          -DCMAKE_CXX_COMPILER=x86_64-unknown-linux-musl-g++ \
-          -DLLD_INCLUDE_TOOLS=ON \
-          -DLLVM_ENABLE_PROJECTS="llvm;lld" \
-          -DLLVM_ENABLE_TERMINFO=OFF \
-          -DLLVM_ENABLE_ZLIB=OFF \
-          -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE \
-          -DLLVM_ENABLE_LIBXML2=0 \
-          -DCMAKE_INSTALL_PREFIX="../dist" \
-          -DLLVM_TARGETS_TO_BUILD=X86 \
-          -DLLVM_BUILD_TESTS=OFF \
-          -DLLVM_BUILD_EXAMPLES=OFF \
-          -DLLVM_INCLUDE_TESTS=OFF \
-          -DLLVM_INCLUDE_EXAMPLES=OFF \
-          -DLLVM_INCLUDE_DOCS=OFF
-        
-        working-directory: llvm-project/llvm/build
 
       - name: Building LLVM C API
         run: |
