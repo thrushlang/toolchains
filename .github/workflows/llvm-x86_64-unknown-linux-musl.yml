@@ -12,12 +12,12 @@ jobs:
     permissions:
       contents: write
     env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Generating Unique ID
         run: |
           BASE_NAME=$(echo "$GITHUB_REF" | sed 's|^refs/tags/||')
-          BUILD_ID="${BASE_NAME}-$GITHUB_RUN_ID" 
+          BUILD_ID="${BASE_NAME}-$GITHUB_RUN_ID"
           
           echo "BUILD_ID=$BUILD_ID" >> $GITHUB_ENV
           echo "BASE_NAME=$BASE_NAME" >> $GITHUB_ENV
@@ -37,14 +37,14 @@ jobs:
         run: |
           wget https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/llvm-project-17.0.6.src.tar.xz
 
-      - name: Unpacking LLVM project 
+      - name: Unpacking LLVM project
         run: |
           tar -xf llvm-project-17.0.6.src.tar.xz
           mv llvm-project-17.0.6.src llvm-project
 
-      - name: Creating host-tools build directory 
+      - name: Creating host-tools build directory
         run: |
-           mkdir -p host-build
+          mkdir -p host-build
           
       - name: Build host tools first
         run: |
@@ -81,6 +81,8 @@ jobs:
             -DLLVM_ENABLE_TERMINFO=OFF \
             -DLLVM_ENABLE_ZLIB=ON \
             -DLLVM_ENABLE_LIBXML2=OFF \
+            -DLLVM_BUILD_STATIC=ON \
+            -DLLVM_LINK_LLVM_DYLIB=OFF \
             -DCMAKE_INSTALL_PREFIX="dist" \
             -DLLVM_TARGETS_TO_BUILD=all \
             -DLLVM_BUILD_TESTS=OFF \
