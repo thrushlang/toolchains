@@ -16,7 +16,9 @@ This repository contains a pre-compiled version of the LLVM for building The Thr
 - VERSION: **v18.0.8** 
 - OPERATING SYSTEMS: Windows (x86_64)
 
-### LLVM - AVAILABLE HOST TARGETS
+### LLVM - HOST TARGETS
+
+Host targets mean that LLVM was precompiled specifically for that target which will use the Thrush compiler to compile itself.
 
 #### Windows
 
