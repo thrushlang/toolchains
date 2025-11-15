@@ -2,19 +2,29 @@
 
 # Toolchains
 
-This repository contains a pre-compiled version of the LLVM C API for building The Thrush Compiler and using LLVM in between.
+This repository contains a pre-compiled version of the LLVM for building The Thrush Compiler and using LLVM backend in between.
 
 ## LLVM C API
 
 - VERSION: **v17.0.6** 
 - OPERATING SYSTEMS: Linux (x86_64)
 
-## LLVM C API
-
 - VERSION: **v18.0.8** 
 - OPERATING SYSTEMS: Windows (x86_64)
 
-### LLVM C API - AVAILABLE TARGETS
+### LLVM - AVAILABLE HOST TARGETS
+
+#### Windows
+
+- `x86_64-pc-windows-msvc`
+- `x86_64-pc-windows-gnu`
+
+### Linux
+
+- `x86_64-unknown-linux-gnu`
+- `x86_64-unknown-linux-musl`
+
+### LLVM - AVAILABLE TARGETS
 
 - ``x86_64``
 - ``AArch64``
@@ -34,30 +44,6 @@ This repository contains a pre-compiled version of the LLVM C API for building T
 - ``BPF``
 - ``SPIR-V``
 - ``WebAssembly``
-
-## MLIR C API
-
-- VERSION: **v20.1.0** 
-- OPERATING SYSTEMS: Linux (x86_64)
-
-## MLIR C API
-
-- VERSION: **v20.1.0** 
-- OPERATING SYSTEMS: Windows (x86_64)
-
-## MLIR (Toolchain)
-
-- VERSION: **v17.0.6** 
-- OPERATING SYSTEMS: Linux (x86_64)
-
-## MLIR (Toolchain)
-
-- VERSION: **v18.0.8** 
-- OPERATING SYSTEMS: Windows (x86_64)
-
-### MLIR (Toolchain) - AVAILABLE TARGETS
-
-- ``x86_64``
 
 ## Clang
 
