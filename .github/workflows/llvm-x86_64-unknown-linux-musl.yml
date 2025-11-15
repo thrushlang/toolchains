@@ -25,10 +25,10 @@ jobs:
           BUILD_ID="${BASE_NAME}-$GITHUB_RUN_ID" 
           
           echo "BUILD_ID=$BUILD_ID" >> $GITHUB_ENV
-          echo "BUILD_ID=$TAG_NAME" >> $GITHUB_ENV
+          echo "BASE_NAME=$BASE_NAME" >> $GITHUB_ENV
 
           echo "Unique ID: $BUILD_ID"
-          echo "Base name: $TAG_NAME"
+          echo "Base name: $BASE_NAME"
     
       - name: Installing dependencies
         run: |
@@ -47,11 +47,13 @@ jobs:
           tar -xf llvm-project-17.0.6.src.tar.xz
           mv llvm-project-17.0.6.src llvm-project
 
-          mkdir -p llvm-project/llvm/build
-
-      - name: Clean and configure build
+      - name: Creating build directory
         run: |
-          cmake ../CMakeLists.txt -G Ninja \
+          mkdir -p llvm-build
+
+      - name: Configure LLVM build
+        run: |
+          cmake ../llvm-project/llvm -G Ninja \
             -DCMAKE_BUILD_TYPE=MinSizeRel \
             -DCMAKE_C_COMPILER=x86_64-unknown-linux-musl-gcc \
             -DCMAKE_CXX_COMPILER=x86_64-unknown-linux-musl-g++ \
@@ -61,37 +63,36 @@ jobs:
             -DLLVM_ENABLE_ZLIB=OFF \
             -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE \
             -DLLVM_ENABLE_LIBXML2=0 \
-            -DCMAKE_INSTALL_PREFIX="../dist" \
+            -DCMAKE_INSTALL_PREFIX="dist" \
             -DLLVM_TARGETS_TO_BUILD=X86 \
             -DLLVM_BUILD_TESTS=OFF \
             -DLLVM_BUILD_EXAMPLES=OFF \
             -DLLVM_INCLUDE_TESTS=OFF \
             -DLLVM_INCLUDE_EXAMPLES=OFF \
             -DLLVM_INCLUDE_DOCS=OFF
-        working-directory: llvm-project/llvm/build
+        working-directory: llvm-build
 
-      - name: Building LLVM C API
+      - name: Building LLVM
         run: |
           ninja -j$(nproc)
-        working-directory: llvm-project/llvm/build
+        working-directory: llvm-build
 
-      - name: Installing LLVM C API
+      - name: Installing LLVM
         run: |
           ninja install
-        working-directory: llvm-project/llvm/build
+        working-directory: llvm-build
 
       - name: Cleaning LLVM Binaries
         run: |
-          find llvm-project/llvm/dist/bin -type f -executable ! -name "llvm-config" -delete
+          find llvm-build/dist/bin -type f -executable ! -name "llvm-config" -delete
 
-      - name: Cloning LLVM C API
-        shell: bash
+      - name: Preparing distribution files
         run: |
           mkdir -p tempDir/{lib,bin,include}
           
-          cp -r llvm-project/llvm/dist/lib/* tempDir/lib/
-          cp -r llvm-project/llvm/dist/bin/* tempDir/bin/
-          cp -r llvm-project/llvm/dist/include/* tempDir/include/
+          cp -r llvm-build/dist/lib/* tempDir/lib/
+          cp -r llvm-build/dist/bin/* tempDir/bin/
+          cp -r llvm-build/dist/include/* tempDir/include/
 
       - name: Packaging LLVM (LLVM Libraries, Binaries & Includes)
         run: |
