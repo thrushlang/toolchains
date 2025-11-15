@@ -58,8 +58,8 @@ jobs:
         run: |
           cmake ../CMakeLists.txt -G Ninja \
           -DCMAKE_BUILD_TYPE=MinSizeRel \
-          -DCMAKE_C_COMPILER=musl-gcc \
-          -DCMAKE_CXX_COMPILER=musl-g++ \
+          -DCMAKE_C_COMPILER=x86_64-unknown-linux-musl-gcc \
+          -DCMAKE_CXX_COMPILER=x86_64-unknown-linux-musl-g++ \
           -DLLD_INCLUDE_TOOLS=ON \
           -DLLVM_ENABLE_PROJECTS="llvm;lld" \
           -DLLVM_ENABLE_TERMINFO=OFF \
