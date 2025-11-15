@@ -86,7 +86,9 @@ jobs:
             -DLLVM_BUILD_EXAMPLES=OFF \
             -DLLVM_INCLUDE_TESTS=OFF \
             -DLLVM_INCLUDE_EXAMPLES=OFF \
-            -DLLVM_INCLUDE_DOCS=OFF
+            -DLLVM_INCLUDE_DOCS=OFF \
+            -DLLVM_ENABLE_MODULES=OFF \
+            -DLLVM_ENABLE_PIC=ON
 
         working-directory: llvm-build
         
