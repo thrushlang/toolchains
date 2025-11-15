@@ -1,0 +1,134 @@
+name: llvm-x86_64-unknown-linux-musl
+
+on:
+  push:
+    tags:
+      - 'llvm-x86_64-unknown-linux-musl-v*.*.*'
+jobs:
+  build-llvm:
+    runs-on: ubuntu-latest
+    container:
+      image: messense/rust-musl-cross:x86_64-musl
+    permissions:
+      contents: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+    steps:
+      - name: Generating Unique ID
+        run: |
+          BASE_NAME=$(echo "$GITHUB_REF" | sed 's|^refs/tags/||')
+          BUILD_ID="${BASE_NAME}-$GITHUB_RUN_ID" 
+          
+          echo "BUILD_ID=$BUILD_ID" >> $GITHUB_ENV
+          echo "BASE_NAME=$BASE_NAME" >> $GITHUB_ENV
+
+          echo "Unique ID: $BUILD_ID"
+          echo "Base name: $BASE_NAME"
+
+      - name: Installing dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake ninja-build python3 wget libz-dev binutils xz-utils gcc g++
+
+          sudo apt-get remove -y llvm-16* clang-16* || true
+          sudo rm -rf /usr/lib/llvm-16
+
+      - name: Downloading LLVM project
+        run: |
+          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/llvm-project-17.0.6.src.tar.xz
+
+      - name: Unpacking LLVM project 
+        run: |
+          tar -xf llvm-project-17.0.6.src.tar.xz
+          mv llvm-project-17.0.6.src llvm-project
+          
+      - name: Build host tools first
+        run: |
+          mkdir -p host-build
+
+          cmake ../llvm-project/llvm -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DLLVM_ENABLE_PROJECTS="llvm" \
+            -DLLVM_TARGETS_TO_BUILD="X86" \
+            -DLLVM_BUILD_TESTS=OFF \
+            -DLLVM_INCLUDE_TESTS=OFF \
+            -DLLVM_INCLUDE_EXAMPLES=OFF \
+            -DLLVM_INCLUDE_DOCS=OFF \
+            -DCMAKE_INSTALL_PREFIX="/host-tools"
+
+          ninja -j$(nproc) llvm-tblgen llvm-config
+          ninja install
+          
+        working-directory: host-build
+
+      - name: Creating cross-compilation build directory
+        run: |
+          mkdir -p llvm-build
+
+      - name: Configure LLVM for cross-compilation to musl
+        run: |
+          cmake ../llvm-project/llvm -G Ninja \
+            -DCMAKE_BUILD_TYPE=MinSizeRel \
+            -DCMAKE_C_COMPILER=x86_64-unknown-linux-musl-gcc \
+            -DCMAKE_CXX_COMPILER=x86_64-unknown-linux-musl-g++ \
+            -DCMAKE_SYSROOT=/usr/local/musl/x86_64-unknown-linux-musl \
+            -DLLVM_TABLEGEN=/host-tools/bin/llvm-tblgen \
+            -DLLVM_CONFIG_PATH=/host-tools/bin/llvm-config \
+            -DLLVM_ENABLE_PROJECTS="llvm;lld" \
+            -DLLVM_ENABLE_TERMINFO=OFF \
+            -DLLVM_ENABLE_ZLIB=ON \
+            -DLLVM_ENABLE_LIBXML2=OFF \
+            -DCMAKE_INSTALL_PREFIX="dist" \
+            -DLLVM_TARGETS_TO_BUILD=all \
+            -DLLVM_BUILD_TESTS=OFF \
+            -DLLVM_BUILD_EXAMPLES=OFF \
+            -DLLVM_INCLUDE_TESTS=OFF \
+            -DLLVM_INCLUDE_EXAMPLES=OFF \
+            -DLLVM_INCLUDE_DOCS=OFF
+
+        working-directory: llvm-build
+        
+      - name: Building LLVM for musl
+        run: |
+          ninja -j$(nproc)
+
+        working-directory: llvm-build
+        
+      - name: Installing LLVM for musl
+        run: |
+          ninja install
+
+        working-directory: llvm-build
+
+      - name: Cleaning LLVM Binaries
+        run: |
+          find llvm-build/dist/bin -type f -executable ! -name "llvm-config" -delete
+          
+      - name: Preparing distribution files
+        run: |
+          mkdir -p tempDir/{lib,bin,include}
+
+          cp -r llvm-build/dist/lib/* tempDir/lib/
+          cp -r llvm-build/dist/bin/* tempDir/bin/
+          cp -r llvm-build/dist/include/* tempDir/include/
+
+      - name: Packaging LLVM (LLVM Libraries, Binaries & Includes)
+        run: |
+          tar --format=pax -cJf llvm-x86_64-unknown-linux-musl.tar.xz --exclude='*/*.cmake' --exclude='*/*.o' --exclude='*/*.d' lib bin include
+        
+        working-directory: tempDir
+
+      - name: Releasing LLVM
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.BUILD_ID }}
+          name: "llvm-x86_64-unknown-linux-musl"
+          body: |
+            ## llvm-x86_64-unknown-linux-musl
+            
+            LLVM libraries for llvm-x86_64-unknown-linux-musl for Thrush compiler compilation.
+
+          files: |
+            tempDir/llvm-x86_64-unknown-linux-musl.tar.xz
+            
+          draft: false
