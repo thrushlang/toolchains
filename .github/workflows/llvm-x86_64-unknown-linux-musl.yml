@@ -41,11 +41,15 @@ jobs:
         run: |
           tar -xf llvm-project-17.0.6.src.tar.xz
           mv llvm-project-17.0.6.src llvm-project
+
+          mkdir -p host-build
+
+      - name: Creating host-tools build directory 
+        run: |
+           mkdir -p host-build
           
       - name: Build host tools first
         run: |
-          mkdir -p host-build
-
           cmake ../llvm-project/llvm -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DLLVM_ENABLE_PROJECTS="llvm" \
