@@ -132,7 +132,7 @@ jobs:
             ## llvm-x86_64-unknown-linux-gnu
             
             LLVM for x86_64-unknown-linux-gnu host target for Thrush Compiler build phase.
-            
+
           files: |
             tempDir/llvm-x86_64-unknown-linux-gnu.tar.xz
             

@@ -28,7 +28,7 @@ jobs:
       - name: Installing dependencies
         run: |
           apt-get update
-          apt-get install -y build-essential cmake ninja-build python3 wget libz-dev binutils xz-utils gcc g++ lld
+          apt-get install -y build-essential cmake ninja-build python3 wget libz-dev binutils xz-utils gcc g++
 
           apt-get remove -y llvm-16* clang-16* || true
           rm -rf /usr/lib/llvm-16
@@ -52,7 +52,6 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DLLVM_ENABLE_PROJECTS="llvm" \
             -DLLVM_TARGETS_TO_BUILD="X86" \
-            -DLLVM_USE_LINKER=lld \
             -DLLVM_BUILD_TESTS=OFF \
             -DLLVM_INCLUDE_TESTS=OFF \
             -DLLVM_INCLUDE_EXAMPLES=OFF \
@@ -78,7 +77,6 @@ jobs:
             -DLLVM_TABLEGEN=/host-tools/bin/llvm-tblgen \
             -DLLVM_CONFIG_PATH=/host-tools/bin/llvm-config \
             -DLLVM_ENABLE_PROJECTS="llvm;lld" \
-            -DLLVM_USE_LINKER=lld \
             -DLLVM_ENABLE_TERMINFO=OFF \
             -DLLVM_ENABLE_ZLIB=ON \
             -DLLVM_ENABLE_LIBXML2=OFF \
