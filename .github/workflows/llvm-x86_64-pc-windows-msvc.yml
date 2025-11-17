@@ -137,7 +137,10 @@ jobs:
           body: |
             ## llvm-x86_64-pc-windows-msvc
             
-            LLVM for x86_64-pc-windows-msvc host target for Thrush Compiler build phase.
+            LLVM precompiled for x86_64-pc-windows-msvc host target triple.
+            
+            The LLVM backend has been precompiled specifically for linking to a system that follows the triple-target convention. 
+            This precompilation is intended solely for building the Thrush Compiler. Both LLVM and Thrush maintain their ability to perform cross-compilation for multiple targets.
             
           files: |
             tempDir/llvm-x86_64-pc-windows-msvc.zip
