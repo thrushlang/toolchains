@@ -1,4 +1,4 @@
-name: LLVM-C API (Windows)
+ame: LLVM-C API (Windows)
 
 on:
   push:
@@ -6,141 +6,61 @@ on:
       - 'LLVM-C-API-WINDOWS-v*.*.*'
 
 jobs:
-  build-llvm:
-    runs-on: windows-2022
+    windowsBuild:
+        name: Build LLVM (Windows)
+        runs-on: windows-2022
 
-    permissions:
-      contents: write
-  
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  
-    steps:
-      - name: Generating Unique ID
-        shell: pwsh
-        run: |
-          $BASE_NAME = "${{ github.ref }}".Replace('refs/tags/', '')
-          $BUILD_ID = "${BASE_NAME}"
-          
-          echo "BUILD_ID=$BUILD_ID" | Out-File -FilePath $env:GITHUB_ENV -Append
-          echo "BASE_NAME=$BASE_NAME" | Out-File -FilePath $env:GITHUB_ENV -Append
+        permissions:
+          contents: write
 
-          echo "Unique ID: $BUILD_ID"
-          echo "Base name: $BASE_NAME"
-    
-      - name: Set up build environment
-        uses: ilammy/msvc-dev-cmd@v1
+        env:
+            BUILD_PROJECT: llvm
+            BUILD_MASTER: false
+            LLVM_VERSION: 17.0.6
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
+        strategy:
+            fail-fast: false
+            matrix:
+                CRT:
+                -  libcmt
 
-      - name: Install Ninja
-        shell: pwsh
-        run: |
-          pip install ninja
-          ninja --version
+                TARGET_CPU:
+                -  amd64
 
-      - name: Install CMake
-        uses: lukka/get-cmake@latest
+                CONFIGURATION:
+                -  Release
 
-      - name: Downloading LLVM project
-        shell: pwsh
-        run: |
-          Invoke-WebRequest -Uri "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/llvm-project-18.1.8.src.tar.xz" -OutFile "llvm-project-18.1.8.src.tar.xz"
-      
-      - name: Install 7zip
-        shell: pwsh
-        run: |
-          choco install 7zip -y
+        steps:
+        -   name: Checkout repo
+            uses: actions/checkout@v3
 
-      - name: Unpacking LLVM project
-        shell: pwsh
-        run: |
-          7z x llvm-project-18.1.8.src.tar.xz -so | 7z x -si -ttar -snld
-          Rename-Item -Path "llvm-project-18.1.8.src" -NewName "llvm-project"
+        -   name: Generating Unique Identification
+            shell: cmd
+            run: call %GITHUB_WORKSPACE%\windows\generate-build-id.bat
 
-      - name: Preparing for build (LLVM-C API)
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Path "llvm-project\llvm\build" -Force
-          New-Item -ItemType Directory -Path "llvm-project\llvm\dist" -Force
-        
-      - name: Configuring CMake (LLVM C API)
-        shell: pwsh
-        run: |
-          cd llvm-project\llvm\build
-          cmake ..\CMakeLists.txt -G Ninja `
-            -DLLVM_ENABLE_PROJECTS="llvm;lld" `
-            -DCMAKE_C_COMPILER_TARGET=x86_64-pc-windows-msvc `
-            -DCMAKE_CXX_COMPILER_TARGET=x86_64-pc-windows-msvc `
-            -DCMAKE_CXX_FLAGS="-Os" `
-            -DCMAKE_C_FLAGS="-Os" `
-            -DCMAKE_EXE_LINKER_FLAGS="/OPT:REF /OPT:ICF" `
-            -DLLVM_ENABLE_TERMINFO=OFF `
-            -DLLVM_ENABLE_ZLIB=OFF `
-            -DCMAKE_DISABLE_FIND_PACKAGE_LibXml2=TRUE `
-            -DLLVM_ENABLE_LIBXML2=0 `
-            -DLLVM_INCLUDE_UTILS=OFF `
-            -DCMAKE_INSTALL_PREFIX="..\dist" `
-            -DCMAKE_BUILD_TYPE=MinSizeRel `
-            -DLLVM_TARGETS_TO_BUILD=all `
-            -DLLVM_BUILD_TESTS=OFF `
-            -DLLVM_BUILD_EXAMPLES=OFF `
-            -DLLVM_INCLUDE_TESTS=OFF `
-            -DLLVM_INCLUDE_EXAMPLES=OFF `
-            -DLLVM_INCLUDE_DOCS=OFF
+        -   name: Installing LLVM Toolchain
+            shell: cmd
+            run: |
+                call %GITHUB_WORKSPACE%\targets\x86_64-pc-windows-libcmt\set-env.bat msvc17 ${{matrix.CRT}} ${{matrix.TARGET_CPU}} ${{matrix.CONFIGURATION}}
+                call %GITHUB_WORKSPACE%\windows\install.bat
 
-      - name: Building LLVM C API
-        shell: pwsh
-        run: |
-          cd llvm-project\llvm\build
+        -   name: Build LLVM Toolchain
+            id: BUILD
+            shell: cmd
+            run: |
+                call %GITHUB_WORKSPACE%\targets\x86_64-pc-windows-libcmt\set-env.bat msvc17 ${{matrix.CRT}} ${{matrix.TARGET_CPU}} ${{matrix.CONFIGURATION}}
+                call %GITHUB_WORKSPACE%\targets\x86_64-pc-windows-libcmt\build.bat
 
-          ninja -j $env:NUMBER_OF_PROCESSORS
+        -  name: Releasing LLVM Toolchain
+           uses: softprops/action-gh-release@v2
+           with:
+              tag_name: ${{ env.BUILD_ID }}
+              name: "LLVM Toolchain (Windows)"
+              body: |
+                ## LLVM C API
 
-      - name: Installing LLVM C API
-        shell: pwsh
-        run: |
-          cd llvm-project\llvm\build
-          ninja install
+                LLVM C API (v17.0.6) libraries for Windows x86_64 environments.
 
-      - name: Cleaning LLVM Binaries
-        shell: pwsh
-        run: |
-          $binPath = "llvm-project\llvm\build\bin"
-          Get-ChildItem -Path $binPath -Filter "*.exe" | Where-Object { $_.Name -ne "llvm-config.exe" } | Remove-Item -Force
-
-      - name: Packaging LLVM C API
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Path "tempDir" -Force
-          
-          New-Item -ItemType Directory -Path "tempDir\lib" -Force
-          New-Item -ItemType Directory -Path "tempDir\bin" -Force
-          New-Item -ItemType Directory -Path "tempDir\include" -Force
-          
-          Copy-Item -Path "llvm-project\llvm\build\lib\*" -Destination "tempDir\lib\" -Recurse -Force
-          Copy-Item -Path "llvm-project\llvm\build\bin\*" -Destination "tempDir\bin\" -Recurse -Force
-          Copy-Item -Path "llvm-project\llvm\dist\include\*" -Destination "tempDir\include\" -Recurse -Force
-
-      - name: Packaging LLVM C API (LLVM C API Libraries, binaries & includes)
-        shell: pwsh
-        run: |
-          cd tempDir
-          7z a -tzip llvm-c-api-x64-windows.zip lib bin include
-        
-      - name: Releasing LLVM C API
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ env.BUILD_ID }}
-          name: "LLVM C API (Windows)"
-          body: |
-            ## LLVM C API
-           
-            LLVM C API (v17.0.6) libraries for Windows x64 environments.
-            
-          files: |
-            tempDir/llvm-c-api-x64-windows.zip
-            
-          draft: false
+              files: ${{steps.BUILD.outputs.DEPLOY_FILE}}
+              draft: false
