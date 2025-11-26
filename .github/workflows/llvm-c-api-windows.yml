@@ -1,4 +1,4 @@
-ame: LLVM-C API (Windows)
+name: LLVM-C API (Windows)
 
 on:
   push:
