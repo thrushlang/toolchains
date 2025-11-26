@@ -48,7 +48,7 @@ goto :eof
 echo set_target_properties(llvm-config PROPERTIES EXCLUDE_FROM_ALL FALSE) >> %WORKING_DIR%\llvm\tools\llvm-config\CMakeLists.txt
 echo install(TARGETS llvm-config RUNTIME DESTINATION bin) >> %WORKING_DIR%\llvm\tools\llvm-config\CMakeLists.txt
 
-perl pdb-patch.pl %WORKING_DIR%\llvm\cmake\modules\AddLLVM.cmake
+perl targets/x86_64-pc-windows-libcmt/pdb-patch.pl %WORKING_DIR%\llvm\cmake\modules\AddLLVM.cmake
 
 goto :eof
 
@@ -76,10 +76,10 @@ if /i "%BUILD_MASTER%" == "true" (
 	)
 )
 
-perl compare-versions.pl %LLVM_VERSION% 11
+perl targets/x86_64-pc-windows-libcmt/compare-versions.pl %LLVM_VERSION% 11
 if %errorlevel% == -1 goto nobigobj
 
-perl compare-versions.pl %LLVM_VERSION% 12
+perl targets/x86_64-pc-windows-libcmt/compare-versions.pl %LLVM_VERSION% 12
 if not %errorlevel% == -1 goto nobigobj
 
 :: clang-11 requires /bigobj (fixed in clang-12)
