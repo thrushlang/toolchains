@@ -37,7 +37,7 @@ jobs:
 
         -   name: Generating Unique Identification
             shell: cmd
-            run: call %GITHUB_WORKSPACE%\windows\generate-build-id.bat
+            run: call %GITHUB_WORKSPACE%\targets\x86_64-pc-windows-libcmt\generate-build-id.bat
 
         -   name: Installing LLVM Toolchain
             shell: cmd
