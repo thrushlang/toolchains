@@ -19,9 +19,16 @@ exit -1
 
 mkdir llvm\build
 cd llvm\build
+
 cmake .. %LLVM_CMAKE_CONFIGURE_FLAGS%
 cmake --build . %CMAKE_BUILD_FLAGS%
 cmake --build . --target install %CMAKE_BUILD_FLAGS%
+
+for %%f in ("bin\*.exe") do (
+    if /i not "%%~nxf" == "llvm-config.exe" (
+        del "%%f"
+    )
+)
 
 cd %THIS_DIR%
 
