@@ -43,7 +43,7 @@ jobs:
             shell: cmd
             run: |
                 call %GITHUB_WORKSPACE%\targets\x86_64-pc-windows-libcmt\set-env.bat msvc17 ${{matrix.CRT}} ${{matrix.TARGET_CPU}} ${{matrix.CONFIGURATION}}
-                call %GITHUB_WORKSPACE%\windows\install.bat
+                call %GITHUB_WORKSPACE%\targets\x86_64-pc-windows-libcmt\install.bat
 
         -   name: Build LLVM Toolchain
             id: BUILD
