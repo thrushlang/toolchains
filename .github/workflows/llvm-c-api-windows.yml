@@ -63,5 +63,5 @@ jobs:
                   LLVM C API (v17.0.6) libraries for Windows x64 environments.
                   
                 files: |
-                  toolchains\llvm-c-api-x86_64-windows.zip
+                  llvm-c-api-x86_64-windows.zip
                 draft: false
