@@ -1,9 +1,9 @@
-name: llvm-x86_64-pc-windows-msvc
+name: llvm-x86_64-pc-windows-libcmt
 
 on:
   push:
     tags:
-      - 'llvm-x86_64-pc-windows-msvc-v*.*.*'
+      - 'llvm-x86_64-pc-windows-libcmt-v*.*.*'
 
 jobs:
     windowsBuild:
@@ -23,7 +23,7 @@ jobs:
             fail-fast: false
             matrix:
                 CRT:
-                -  msvc17
+                -  libcmt
 
                 TARGET_CPU:
                 -  amd64
@@ -37,31 +37,31 @@ jobs:
 
         -   name: Generating Unique Identification
             shell: cmd
-            run: call %GITHUB_WORKSPACE%\targets\x86_64-pc-windows-msvcrt\generate-build-id.bat
+            run: call %GITHUB_WORKSPACE%\targets\x86_64-pc-windows-libcmt\generate-build-id.bat
 
         -   name: Installing LLVM Toolchain
             shell: cmd
             run: |
-                call %GITHUB_WORKSPACE%\targets\x86_64-pc-windows-msvcrt\set-env.bat msvc17 ${{matrix.CRT}} ${{matrix.TARGET_CPU}} ${{matrix.CONFIGURATION}}
-                call %GITHUB_WORKSPACE%\targets\x86_64-pc-windows-msvcrt\install.bat
+                call %GITHUB_WORKSPACE%\targets\x86_64-pc-windows-libcmt\set-env.bat msvc17 ${{matrix.CRT}} ${{matrix.TARGET_CPU}} ${{matrix.CONFIGURATION}}
+                call %GITHUB_WORKSPACE%\targets\x86_64-pc-windows-libcmt\install.bat
 
         -   name: Build LLVM Toolchain
             id: BUILD
             shell: cmd
             run: |
-                call %GITHUB_WORKSPACE%\targets\x86_64-pc-windows-msvcrt\set-env.bat msvc17 ${{matrix.CRT}} ${{matrix.TARGET_CPU}} ${{matrix.CONFIGURATION}}
-                call %GITHUB_WORKSPACE%\targets\x86_64-pc-windows-msvcrt\build.bat
+                call %GITHUB_WORKSPACE%\targets\x86_64-pc-windows-libcmt\set-env.bat msvc17 ${{matrix.CRT}} ${{matrix.TARGET_CPU}} ${{matrix.CONFIGURATION}}
+                call %GITHUB_WORKSPACE%\targets\x86_64-pc-windows-libcmt\build.bat
 
         -   name: Releasing LLVM C API
             uses: softprops/action-gh-release@v2
             with:
                 tag_name: ${{ env.BUILD_ID }}
-                name: "llvm-x86_64-pc-windows-msvc"
+                name: "llvm-x86_64-pc-windows-libcmt"
                 body: |
                   ## LLVM C API
                  
                   LLVM C API (v17.0.6) libraries for Windows x64 environments.
                   
                 files: |
-                  llvm-x86_64-pc-windows-msvcrt.zip
+                  llvm-x86_64-pc-windows-libcmt.zip
                 draft: false

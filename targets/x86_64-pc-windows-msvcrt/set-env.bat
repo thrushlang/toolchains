@@ -77,9 +77,6 @@ set CLANG_CMAKE_CONFIGURE_EXTRA_FLAGS=
 shift
 goto :loop
 
-:: don't try to build Debug tools -- executables will be huge and not really
-:: essential (whoever needs tools, can just download a Release build)
-
 :dbg
 set CONFIGURATION=Debug
 set DEBUG_SUFFIX=-dbg
@@ -101,7 +98,7 @@ set LLVM_CMAKELISTS_URL=https://raw.githubusercontent.com/llvm/llvm-project/main
 
 if /i "%BUILD_MASTER%" == "true" (
 	powershell "Invoke-WebRequest -Uri %LLVM_CMAKELISTS_URL% -OutFile CMakeLists.txt"
-	for /f %%i in ('perl targets/x86_64-pc-windows-libcmt/print-llvm-version.pl CMakeLists.txt') do set LLVM_VERSION=%%i
+	for /f %%i in ('perl targets/x86_64-pc-windows-msvcrt/print-llvm-version.pl CMakeLists.txt') do set LLVM_VERSION=%%i
 	set LLVM_RELEASE_TAG=llvm-master
 )
 
@@ -113,19 +110,19 @@ if "%CMAKE_USE_ARCH_OPTIONS%" == "" (set CMAKE_GENERATOR=%CMAKE_GENERATOR%%CMAKE
 if not "%CMAKE_USE_ARCH_OPTIONS%" == "" (set CMAKE_OPTIONS=%CMAKE_OPTIONS%%CMAKE_ARCH_OPTIONS%)
 
 set TAR_SUFFIX=.tar.xz
-perl targets/x86_64-pc-windows-libcmt/compare-versions.pl %LLVM_VERSION% 3.5.0
+perl targets/x86_64-pc-windows-msvcrt/compare-versions.pl %LLVM_VERSION% 3.5.0
 if %errorlevel% == -1 set TAR_SUFFIX=.tar.gz
 
 set BASE_DOWNLOAD_URL=https://github.com/llvm/llvm-project/releases/download/llvmorg-%LLVM_VERSION%
 set BASE_DOWNLOAD_URL_LEGACY=http://releases.llvm.org/%LLVM_VERSION%
-perl targets/x86_64-pc-windows-libcmt/compare-versions.pl %LLVM_VERSION% 7.1.0
+perl targets/x86_64-pc-windows-msvcrt/compare-versions.pl %LLVM_VERSION% 7.1.0
 if %errorlevel% == -1 set BASE_DOWNLOAD_URL=%BASE_DOWNLOAD_URL_LEGACY%
 
 if %LLVM_VERSION% == 8.0.0 set BASE_DOWNLOAD_URL=%BASE_DOWNLOAD_URL_LEGACY%
 if %LLVM_VERSION% == 9.0.0 set BASE_DOWNLOAD_URL=%BASE_DOWNLOAD_URL_LEGACY%
 
 set CLANG_DOWNLOAD_FILE_PREFIX=clang-
-perl targets/x86_64-pc-windows-libcmt/compare-versions.pl %LLVM_VERSION% 9.0.0
+perl targets/x86_64-pc-windows-msvcrt/compare-versions.pl %LLVM_VERSION% 9.0.0
 if %errorlevel% == -1 set CLANG_DOWNLOAD_FILE_PREFIX=cfe-
 
 set LLVM_MASTER_URL=https://github.com/llvm/llvm-project
@@ -133,18 +130,18 @@ set LLVM_DOWNLOAD_FILE=llvm-%LLVM_VERSION%.src%TAR_SUFFIX%
 set LLVM_DOWNLOAD_URL=%BASE_DOWNLOAD_URL%/%LLVM_DOWNLOAD_FILE%
 set LLVM_CMAKE_DOWNLOAD_FILE=cmake-%LLVM_VERSION%.src%TAR_SUFFIX%
 set LLVM_CMAKE_DOWNLOAD_URL=%BASE_DOWNLOAD_URL%/%LLVM_CMAKE_DOWNLOAD_FILE%
-set LLVM_RELEASE_NAME=llvm-x86_64-pc-windows-libcmt
+set LLVM_RELEASE_NAME=llvm-x86_64-pc-windows-msvcrt
 set LLVM_RELEASE_FILE=%LLVM_RELEASE_NAME%.zip
 set LLVM_RELEASE_DIR=%WORKING_DIR%\%LLVM_RELEASE_NAME%
 set LLVM_RELEASE_DIR=%LLVM_RELEASE_DIR:\=/%
 set LLVM_RELEASE_URL=https://github.com/vovkos/llvm-package-windows/releases/download/%LLVM_RELEASE_TAG%/%LLVM_RELEASE_FILE%
 
-perl targets/x86_64-pc-windows-libcmt/compare-versions.pl %LLVM_VERSION% 15.0.0
+perl targets/x86_64-pc-windows-msvcrt/compare-versions.pl %LLVM_VERSION% 15.0.0
 if %errorlevel% == -1 set LLVM_CMAKE_DOWNLOAD_URL=
 
 set LLVM_CMAKE_CRT_FLAGS= -DCMAKE_MSVC_RUNTIME_LIBRARY=%CMAKE_CRT%
 
-perl targets/x86_64-pc-windows-libcmt/compare-versions.pl %LLVM_VERSION% 17.0.0
+perl targets/x86_64-pc-windows-msvcrt/compare-versions.pl %LLVM_VERSION% 17.0.0
 if %errorlevel% == -1 set LLVM_CMAKE_CRT_FLAGS= ^
 	-DLLVM_USE_CRT_DEBUG=%LLVM_CRT%d ^
 	-DLLVM_USE_CRT_RELEASE=%LLVM_CRT% ^
@@ -196,13 +193,13 @@ set CLANG_CMAKE_CONFIGURE_FLAGS= ^
 
 :: . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-perl targets/x86_64-pc-windows-libcmt/compare-versions.pl %LLVM_VERSION% 8.0.0
+perl targets/x86_64-pc-windows-msvcrt/compare-versions.pl %LLVM_VERSION% 8.0.0
 if %errorlevel% == -1 set CLANG_CMAKE_CONFIGURE_FLAGS= ^
 	%CLANG_CMAKE_CONFIGURE_FLAGS% ^
 	-DCLANG_PATH_TO_LLVM_BUILD=%LLVM_RELEASE_DIR% ^
 	-DLLVM_MAIN_SRC_DIR=%LLVM_RELEASE_DIR%
 
-perl targets/x86_64-pc-windows-libcmt/compare-versions.pl %LLVM_VERSION% 3.5.0
+perl targets/x86_64-pc-windows-msvcrt/compare-versions.pl %LLVM_VERSION% 3.5.0
 if %errorlevel% == -1 set CLANG_CMAKE_CONFIGURE_FLAGS= ^
 	%CLANG_CMAKE_CONFIGURE_FLAGS% ^
 	-DLLVM_CONFIG=%LLVM_RELEASE_DIR%/bin/llvm-config
