@@ -22,6 +22,7 @@ Host targets mean that LLVM was precompiled specifically for that target which w
 
 #### Windows
 
+- `x86_64-pc-windows-libcmt`
 - `x86_64-pc-windows-msvc`
 - `x86_64-pc-windows-gnu`
 
