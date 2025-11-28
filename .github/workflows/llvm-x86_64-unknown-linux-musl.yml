@@ -28,12 +28,10 @@ jobs:
       - name: Installing dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake ninja-build python3 wget libz-dev binutils xz-utils gcc g++ lld
+          sudo apt-get install -y build-essential cmake ninja-build python3 wget libz-dev binutils xz-utils gcc g++
 
           sudo apt-get remove -y llvm-16* clang-16* || true
           sudo rm -rf /usr/lib/llvm-16
-
-          sudo apt-get install -y clang
 
       - name: Downloading LLVM project
         run: |
@@ -54,7 +52,6 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DLLVM_ENABLE_PROJECTS="llvm" \
             -DLLVM_TARGETS_TO_BUILD="X86" \
-            -DLLVM_USE_LINKER=lld \
             -DLLVM_BUILD_TESTS=OFF \
             -DLLVM_INCLUDE_TESTS=OFF \
             -DLLVM_INCLUDE_EXAMPLES=OFF \
@@ -72,16 +69,12 @@ jobs:
 
       - name: Configure LLVM for cross-compilation to musl
         run: |
-         cmake ../llvm-project/llvm -G Ninja \
+          cmake ../llvm-project/llvm -G Ninja \
             -DCMAKE_BUILD_TYPE=MinSizeRel \
-            -DCMAKE_C_COMPILER=clang \
-            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_C_COMPILER=x86_64-unknown-linux-musl-gcc \
+            -DCMAKE_CXX_COMPILER=x86_64-unknown-linux-musl-g++ \
             -DCMAKE_SYSROOT=/usr/local/musl/x86_64-unknown-linux-musl \
-            -DCMAKE_C_FLAGS="--target=x86_64-unknown-linux-musl --sysroot=/usr/local/musl/x86_64-unknown-linux-musl" \
-            -DCMAKE_CXX_FLAGS="--target=x86_64-unknown-linux-musl --sysroot=/usr/local/musl/x86_64-unknown-linux-musl" \
-            -DCMAKE_ASM_FLAGS="--target=x86_64-unknown-linux-musl --sysroot=/usr/local/musl/x86_64-unknown-linux-musl" \
             -DLLVM_TABLEGEN=/host-tools/bin/llvm-tblgen \
-            -DLLVM_CONFIG_PATH=/host-tools/bin/llvm-config \
             -DLLVM_ENABLE_PROJECTS="llvm" \
             -DLLVM_ENABLE_TERMINFO=OFF \
             -DLLVM_ENABLE_ZLIB=ON \
