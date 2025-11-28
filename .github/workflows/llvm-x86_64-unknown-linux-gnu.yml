@@ -54,10 +54,9 @@ jobs:
             -DCMAKE_BUILD_TYPE=MinSizeRel \
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
-            -DCMAKE_SYSROOT=/usr/x86_64-unknown-linux-gnu/x86_64-unknown-linux-gnu/sysroot \
-            -DCMAKE_C_FLAGS="--target=x86_64-unknown-linux-gnu --sysroot=/usr/x86_64-unknown-linux-gnu/x86_64-unknown-linux-gnu/sysroot" \
-            -DCMAKE_CXX_FLAGS="--target=x86_64-unknown-linux-gnu --sysroot=/usr/x86_64-unknown-linux-gnu/x86_64-unknown-linux-gnu/sysroot" \
-            -DCMAKE_ASM_FLAGS="--target=x86_64-unknown-linux-gnu --sysroot=/usr/x86_64-unknown-linux-gnu/x86_64-unknown-linux-gnu/sysroot" \
+            -DCMAKE_C_FLAGS="--target=x86_64-unknown-linux-gnu" \
+            -DCMAKE_CXX_FLAGS="--target=x86_64-unknown-linux-gnu" \
+            -DCMAKE_ASM_FLAGS="--target=x86_64-unknown-linux-gnu" \
             -DLLVM_ENABLE_PROJECTS="llvm" \
             -DLLVM_ENABLE_TERMINFO=OFF \
             -DLLVM_ENABLE_ZLIB=ON \
