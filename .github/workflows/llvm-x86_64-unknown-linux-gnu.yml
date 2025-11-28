@@ -44,26 +44,6 @@ jobs:
           tar -xf llvm-project-17.0.6.src.tar.xz
           mv llvm-project-17.0.6.src llvm-project
 
-      - name: Creating host-tools build directory 
-        run: |
-           mkdir -p host-build
-          
-      - name: Build host tools first
-        run: |
-          cmake ../llvm-project/llvm -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DLLVM_ENABLE_PROJECTS="llvm" \
-            -DLLVM_TARGETS_TO_BUILD="X86" \
-            -DLLVM_USE_LINKER=lld \
-            -DLLVM_BUILD_TESTS=OFF \
-            -DLLVM_INCLUDE_TESTS=OFF \
-            -DLLVM_INCLUDE_EXAMPLES=OFF \
-            -DLLVM_INCLUDE_DOCS=OFF \
-            -DCMAKE_INSTALL_PREFIX="/host-tools"
-
-          ninja -j$(nproc) llvm-tblgen llvm-config
-          ninja install
-          
         working-directory: host-build
 
       - name: Creating cross-compilation build directory
@@ -80,8 +60,6 @@ jobs:
             -DCMAKE_C_FLAGS="--target=x86_64-unknown-linux-gnu --sysroot=/usr/x86_64-unknown-linux-gnu/x86_64-unknown-linux-gnu/sysroot" \
             -DCMAKE_CXX_FLAGS="--target=x86_64-unknown-linux-gnu --sysroot=/usr/x86_64-unknown-linux-gnu/x86_64-unknown-linux-gnu/sysroot" \
             -DCMAKE_ASM_FLAGS="--target=x86_64-unknown-linux-gnu --sysroot=/usr/x86_64-unknown-linux-gnu/x86_64-unknown-linux-gnu/sysroot" \
-            -DLLVM_TABLEGEN=/host-tools/bin/llvm-tblgen \
-            -DLLVM_CONFIG_PATH=/host-tools/bin/llvm-config \
             -DLLVM_ENABLE_PROJECTS="llvm" \
             -DLLVM_ENABLE_TERMINFO=OFF \
             -DLLVM_ENABLE_ZLIB=ON \
