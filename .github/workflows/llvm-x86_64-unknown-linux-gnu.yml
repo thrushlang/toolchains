@@ -33,6 +33,8 @@ jobs:
           sudo apt-get remove -y llvm-16* clang-16* || true
           sudo rm -rf /usr/lib/llvm-16
 
+          sudo apt-get install -y clang
+
       - name: Downloading LLVM project
         run: |
           wget https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/llvm-project-17.0.6.src.tar.xz
@@ -72,12 +74,15 @@ jobs:
         run: |
           cmake ../llvm-project/llvm -G Ninja \
             -DCMAKE_BUILD_TYPE=MinSizeRel \
-            -DCMAKE_C_COMPILER=x86_64-unknown-linux-gnu-gcc \
-            -DCMAKE_CXX_COMPILER=x86_64-unknown-linux-gnu-g++ \
-            -DCMAKE_SYSROOT=/usr/x86_64-unknown-linux-gnu/x86_64-unknown-linux-gnu/sysroot/ \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_SYSROOT=/usr/x86_64-unknown-linux-gnu/x86_64-unknown-linux-gnu/sysroot \
+            -DCMAKE_C_FLAGS="--target=x86_64-unknown-linux-gnu --sysroot=/usr/x86_64-unknown-linux-gnu/x86_64-unknown-linux-gnu/sysroot" \
+            -DCMAKE_CXX_FLAGS="--target=x86_64-unknown-linux-gnu --sysroot=/usr/x86_64-unknown-linux-gnu/x86_64-unknown-linux-gnu/sysroot" \
+            -DCMAKE_ASM_FLAGS="--target=x86_64-unknown-linux-gnu --sysroot=/usr/x86_64-unknown-linux-gnu/x86_64-unknown-linux-gnu/sysroot" \
             -DLLVM_TABLEGEN=/host-tools/bin/llvm-tblgen \
             -DLLVM_CONFIG_PATH=/host-tools/bin/llvm-config \
-            -DLLVM_ENABLE_PROJECTS="llvm;lld" \
+            -DLLVM_ENABLE_PROJECTS="llvm" \
             -DLLVM_ENABLE_TERMINFO=OFF \
             -DLLVM_ENABLE_ZLIB=ON \
             -DLLVM_ENABLE_LIBXML2=OFF \

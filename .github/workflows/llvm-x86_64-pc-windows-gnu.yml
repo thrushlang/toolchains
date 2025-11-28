@@ -55,7 +55,7 @@ jobs:
           -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++-posix \
           -DCMAKE_C_FLAGS="--sysroot=/usr/x86_64-w64-mingw32 -idirafter/usr/include" \
           -DCMAKE_CXX_FLAGS="--sysroot=/usr/x86_64-w64-mingw32 -idirafter/usr/include" \
-          -DLLVM_ENABLE_PROJECTS="llvm;lld" \
+          -DLLVM_ENABLE_PROJECTS="llvm" \
           -DLLVM_ENABLE_TERMINFO=OFF \
           -DLLVM_ENABLE_ZLIB=ON \
           -DLLVM_ENABLE_LIBXML2=OFF \
