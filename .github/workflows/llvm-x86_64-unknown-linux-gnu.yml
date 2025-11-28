@@ -44,8 +44,6 @@ jobs:
           tar -xf llvm-project-17.0.6.src.tar.xz
           mv llvm-project-17.0.6.src llvm-project
 
-        working-directory: host-build
-
       - name: Creating cross-compilation build directory
         run: |
           mkdir -p llvm-build
